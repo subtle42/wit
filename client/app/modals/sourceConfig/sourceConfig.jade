@@ -1,0 +1,47 @@
+div.modal-header
+	h3.modal-title
+		| Edit Source
+div.modal-body(style="425px")
+	div(style="width:20%; float:left")
+		div.left-inner-addon
+			i.fa.fa-search
+			input.form-control(type="text",
+				ng-model="search.title",
+				placeholder="Search Data Sources")
+		ul.list-group(style="height:350px; overflow-y:auto")
+			a(ng-repeat="ds in sourceList | filter:search:strict",
+				ng-click="selectSource(ds)",
+				ng-class="{'list-group-item': true,\
+					'active': focus._id == ds._id,\
+					'list-group-item-success': ds.type == 1,\
+					'list-group-item-info': ds.type == 2,\
+					'list-group-item-warning': ds.type == 3}")
+				| {{ds.title}}
+				span.pull-right
+					i.fa.fa-lg.fa-file-excel-o(ng-class="{'fa fa-lg': true,\
+						'fa-file-excel-o': ds.type == 1,\
+						'fa-database': ds.type == 2,\
+						'fa-code': ds.type == 3}")
+					i.fa.fa-lg.fa-share-alt
+	div(style="width:75%; float:right")
+		ul.list-group(style="height:350px; overflow-y:auto",
+			ui-sortable="colSortOptions",
+			ng-model="focus.columns")
+			li(ng-repeat="myCol in focus.columns",
+				ng-class="{'list-group-item': true,\
+					'list-group-item-warning': myCol.type == 'group',\
+					'list-group-item-danger': myCol.type == 'number',\
+					'list-group-item-info': myCol.type == 'date'}")
+				input(type="text",
+					ng-model="myCol.display",
+					readonly="true",
+					ondblclick="this.readOnly='';",
+					style="border:none; background:transparent")
+				select.pull-right(ng-options='ct for ct in colTypes',
+					ng-model='myCol.type',
+					ng-change='test(myCol)')
+div.modal-footer
+	button.btn.btn-warning(ng-click="cancel()")
+		| Cancel
+	button.btn.btn-primary(ng-click="save()")
+		| Save

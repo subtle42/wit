@@ -1,0 +1,46 @@
+div.modal-header
+	h3.modal-title
+		| Edit Widget
+div.modal-body
+	span
+		table
+			tr
+				td
+				td
+					input.marginInput(type="number",
+						min="0",
+						ng-minlength="1",
+						ng-model="widget.margins.top",
+						ng-change="updateDisplay()")
+				td
+			tr
+				td
+					input.marginInput(type="number",
+						min="0",
+						ng-minlength="1",
+						ng-model="widget.margins.left",
+						ng-change="updateDisplay()")
+				td
+				td
+					input.marginInput(type="number",
+						min="0",
+						ng-minlength="1",
+						ng-model="widget.margins.right",
+						ng-change="updateDisplay()")
+			tr
+				td
+				td
+					input.marginInput(type="number",
+						min="0",
+						ng-minlength="1",
+						ng-model="widget.margins.bottom",
+						ng-change="updateDisplay()")
+				td
+
+	div(d3chart,
+		style="height:200px; width:200px")
+div.modal-footer
+	button.btn.btn-warning(ng-click="cancel()")
+		| Cancel
+	button.btn.btn-primary(ng-click="save()")
+		| Save

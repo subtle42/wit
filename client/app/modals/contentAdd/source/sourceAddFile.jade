@@ -1,0 +1,30 @@
+div(ng-show="pages.page1")
+	div.well.well-sm.center-block(ng-file-drop="onFileSelect($files)",
+		ng-hide="fileProgress > 0",
+		style="width:66%; height-min:200px")
+		center
+			h2(style="color:gray-light")
+				b 
+					| Drop file here to upload
+					br
+					| or
+				br
+				button.btn.btn-default(type="file",
+					ng-file-select="onFileSelect($files)")
+	progressbar.progress-striped.active(ng-hide="fileProgress == 0",
+		value="fileProgress")
+
+div(ng-show="pages.page2")
+	div.gridStyle(ng-grid="gridOptions")
+
+div.modal-footer
+	button(ng-class="{'btn btn-lg btn-primary pull-left': true, 'disabled': pages.page1}",
+		ng-click="back()")
+		i.fa.fa-chevron-left
+		| Back
+	button.btn.btn-lg.btn-warning.pull-left(ng-click="cancel()")
+		| Cancel
+	button(ng-show="pages.page1",
+		ng-class="{'btn btn-lg btn-primary': true, 'disabled': !typeSelected}",
+		ng-click="addWidgetFinish()")
+		| Add Source

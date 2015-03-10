@@ -1,0 +1,15 @@
+div.modal-header
+	h3.modal-title
+		| Add New Page
+div.modal-body
+	label(for="pageTitleInput")
+		| Page Title:
+	input(type="text",
+		ng-focus,
+		ng-model="newPageTitle",
+		ng-enter="save()")
+div.modal-footer
+	button.btn.btn-warning(ng-click="cancel()")
+		| Cancel
+	button.btn.btn-primary(ng-click="save()")
+		| Save

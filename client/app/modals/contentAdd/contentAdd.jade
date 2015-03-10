@@ -1,0 +1,21 @@
+div.modal-header
+	h3.modal-title
+		| Add Content
+div.modal-body
+	tabset(justified="true")
+		tab(disabled="addWidgetTab.disabled",
+			heading="Add Widget",
+			active="addWidgetTab.active")
+			div(ng-controller="AddWidgetCtrl",
+				ng-include="'app/modals/contentAdd/widget/widgetAdd.html'")
+		tab(heading="Add Data Source",
+			active="addDataSourceTab.active",
+			disabled="addDataSourceTab.disabled")
+			tabset(justified="true")
+				tab(heading="File Upload")
+					div(ng-controller="AddSourceFileCtrl",
+						ng-include="'app/modals/contentAdd/source/sourceAddFile.html'")
+				tab(heading="Database",
+					disabled="true")
+				tab(heading="JSON Feed",
+					disabled="true")

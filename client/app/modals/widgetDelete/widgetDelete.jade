@@ -1,0 +1,10 @@
+div.modal-header
+	h3.modal-title
+		| Delete Widget
+div.modal-body
+	| Are you sure you want to delete: {{widget.title}}?
+div.modal-footer
+	button.btn.btn-warning(ng-click="cancel()")
+		| Cancel
+	button.btn.btn-primary(ng-click="ok()",
+		ng-focus)
