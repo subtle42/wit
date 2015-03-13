@@ -1,0 +1,35 @@
+span
+	select(ng-model="collections.selected",
+		ng-options="coll.name for coll in collections.list")
+	ul.nav.nav-tabs(ui-sortable="tabSortOptions",
+		ng-model="pages.list",
+		role="tablist")
+		li(ng-class="{'active': page.active}",
+			ng-repeat="page in pages.list")
+			a(ng-click="pageSwitch(page)",
+				href="#")
+				| {{page.name}}
+				button.close(stop-event="click",
+					ng-click="pageRemove(page)",
+					type="button")
+					span(aria-hidden="true")
+						| &times;
+					span.sr-only
+						| Close
+		li
+			a(ng-hide="sortingPages",
+				ng-click="addPageModal()")
+				span.glyphicon.glyphicon-plus
+	div(style="padding:7px")
+		span
+			button.btn.btn-success(type="button",
+				ng-click="addContentModal()")
+				| Add Chart
+				i.fa.fa-plus-square
+		span.pull-right
+			button.btn.btn-default(type="button")
+				i.fa.fa-share-alt.fa-lg
+			button.btn.btn-default(ng-click="dataSourceConfigModal()")
+				i.fa.fa-cog.fa-lg
+	widget(ng-repeat="w in widgets.list",
+		widget="w")

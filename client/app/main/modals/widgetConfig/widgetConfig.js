@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('mainApp')
+angular.module('meanApp')
 .controller('WidgetConfigCtrl', function ($scope, $modalInstance, $log, widget) {
 	$scope.widget = angular.copy(widget);
 	$scope.tmpHeight = $scope.widget.height;

@@ -5,6 +5,8 @@ var controller = require('./page.controller');
 
 var router = express.Router();
 
+router.get('/bycollection/:id', controller.getByCollection)
+router.put('/tabselect', controller.tabSelect);
 router.get('/', controller.index);
 router.get('/:id', controller.show);
 router.post('/', controller.create);

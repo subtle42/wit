@@ -12,6 +12,32 @@
 var _ = require('lodash');
 var Collect = require('./collection.model');
 
+// Get all collections for current user
+exports.allByUser = function (req, res) {
+  var userId = req.user._id;
+  console.log('userId: ' + userId);
+
+  Collect.find({ userId: userId}, function (err, collects) {
+    if(err) { return handleError(res, err); }
+    if(!collects) { return res.send(404); }
+
+    // If user has no collections create a record
+    if(collects.length === 0) {
+      var newCollect = new Collect({
+        userId: userId
+      });
+      Collect.create(newCollect, function (err, collect) {
+        if(err) { return handleError(res, err); }
+        if(!collect) { return res.send(404); }
+        console.log('created new collection');
+        return res.json([collect]);
+      });
+    } else {
+      return res.json(collects);
+    }
+  });
+};
+
 // Get list of collects
 exports.index = function(req, res) {
   Collect.find(function (err, collects) {

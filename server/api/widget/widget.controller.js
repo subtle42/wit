@@ -12,6 +12,16 @@
 var _ = require('lodash');
 var Widget = require('./widget.model');
 
+// Get list of widgets by pageId
+exports.byPage = function (req, res) {
+  Widget.find({
+    pageId: req.params.id
+  }, function (err, widgets) {
+    if(err) { return handleError(res, err); }
+    return res.json(widgets)
+  });
+};
+
 // Get list of widgets
 exports.index = function(req, res) {
   Widget.find(function (err, widgets) {

@@ -1,0 +1,79 @@
+div.widget-main.panel.panel-primary(id="{{widget.title}}",
+	ng-class="{'expandWidget': widget.maximize}")
+	div.panel-heading.widget-header(ng-dblclick="maximize()")
+		h3.panel-title
+			button.btn.btn-primary.btn-xs(stop-event="dblclick",
+				ng-click="openConfigMenu()",
+				style="float:left",
+				type="button")
+				i.fa.fa-cog
+			span(ng-hide="showTitleEdit",
+				stop-event="dblclick",
+				ng-dblclick="editTitle()",
+				style="padding-left:10px")
+				| {{widget.title}}
+			input(style="color:black",
+				stop-event="dblclick",
+				ng-blur="editTitle()",
+				focus-title="showTitleEdit",
+				ng-model="widget.title")
+			span.pull-right
+				button.btn.btn-xs.btn-primary(ng-click="collapse()",
+					stop-event="dblclick",
+					type="button")
+					span.glyphicon.glyphicon-minus
+				button.btn.btn-xs.btn-primary(ng-click="maximize()",
+					stop-event="dblclick",
+					type="button")
+					span(ng-class="{'glyphicon': true,\
+						'glyphicon-resize-full': !widget.maximize,\
+						'glyphicon-resize-small': widget.maximize}")
+				button.btn.btn-xs.btn-primary(ng-click="remove(widget)",
+					stop-event="dblclick",
+					type="button")
+	div.panel-footer(ng-hide="widget.collapse",
+		style="padding-bottom:5px; padding-top:5px")
+		button.btn.btn-xs(type="button")
+			span.glyphicon.glyphicon-stats
+			span.glyphicon.glyphicon-plus-sign
+		span.pull-right
+			button.btn.btn-xs.dropdown-toggle(type="button",
+				data-toggle="dropdown")
+				span.glyphicon.glyphicon-stats
+				span.caret
+			button.btn.btn-xs(type="button")
+				i.fa.fa-filter
+				span.badge
+					| 1
+			button.btn.btn-xs(ng-click="lock()",
+				type="button")
+				i(ng-class="{'fa': true,\
+					'fa-lock': widget.locked,\
+					'fa-unlock': !widget.locked}")
+	div.panel-body.widget-content(ng-hide="widget.collapse",
+		ng-style="height: widget.height + 64")
+		center
+			ul(ui-sortable="sortOptions",
+				ng-model="widget.series",
+				style="list-style-type:none")
+				li(style="display:inline",
+					ng-repeat="mySerie in widget.series")
+					serie(index="$index",
+						selector="mySerie",
+						source="source")
+					button.btn.btn-default.btn-xs(style="display:inline",
+						ng-hide="widget.series.length > 2 || seriesMoving")
+
+		div(d3Chart)
+
+		center
+			ul(ui-sortable="sortOptions",
+				ng-model="widget.groups",
+				style="list-style-type:none")
+				li(ng-repeat="myGroup in widget.groups",
+					style="display:inline")
+					group(index="$index",
+						selector="myGroup",
+						source="source")
+				button.btn.btn-default.btn-xs(ng-hide="widget.groups.length > 1")
+					span.glyphicon.glyphicon-plus(ng-click="addGroup()")

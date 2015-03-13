@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('meanApp+')
+angular.module('meanApp')
 .controller('AddWidgetCtrl', function ($scope, $rootScope, $log) {
 	$scope.dataSources = $rootScope.sources.dataSources;
 	$scope.dsSelected = undefined;

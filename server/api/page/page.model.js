@@ -4,9 +4,10 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var PageSchema = new Schema({
-  name: String,
-  info: String,
-  active: Boolean
+  name: { type: String, default: 'Default'},
+  collectionId: { type: String, requried: true },
+  widgetList: { type: Array, default: [] },
+  active: { type: Boolean, default: true}
 });
 
 module.exports = mongoose.model('Page', PageSchema);

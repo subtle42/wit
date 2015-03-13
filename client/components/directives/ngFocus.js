@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('mean.directives')
+angular.module('meanApp.directives')
   .directive('ngFocus', function ($timeout) {
     return {
         restrict: 'AC',

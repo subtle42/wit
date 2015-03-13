@@ -6,7 +6,8 @@ angular.module('meanApp', [
   'ngSanitize',
   'ngRoute',
   'ui.bootstrap',
-  'mean.directives'
+  'meanApp.directives',
+  'mean.factories'
 ])
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider
