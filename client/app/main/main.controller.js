@@ -58,11 +58,13 @@ angular.module('meanApp')
     };
 
     $scope.pageLoad = function () {
+      // Getting all collections
       $rootScope.collections.getByUser(function () {
+        // Get all pages in a collection
         $rootScope.pages.getByCollection($rootScope.collections.selected._id, function () {
-          $log.log('loading widgets');
+          // Get all widgets on a page
           $rootScope.widgets.getByPage($rootScope.pages.selected._id, function () {
-            $log.log('everyone done');
+            // Get list of all sources currently on page
             var sourceList = [];
             angular.forEach($rootScope.widgets.list, function (myWidget) {
               if (sourceList.indexOf(myWidget.sourceId) === -1) {
@@ -70,6 +72,7 @@ angular.module('meanApp')
               }
             });
             angular.forEach(sourceList, function (sourceId) {
+              // Get source data for each source on page
               $rootScope.data.get(sourceId);
             });
           });

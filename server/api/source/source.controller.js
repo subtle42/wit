@@ -19,11 +19,31 @@ var Source = require('./Source.model');
 
 // Get list of Sources by user
 exports.byUser = function (req, res) {
-  console.log(req.user._id);
   Source.find({createdBy: req.user._id}, function (err, sources) {
     if(err) { return handleError(res, err);}
     return res.json(sources);
   });
+};
+
+// Get all data for specific source
+exports.getDataAll = function (req, res) {
+  Source.findById(req.params.id, function (err, source) {
+    if(err) { return handleError(res, err); }
+    MongoClient.connect('mongodb://127.0.0.1:27017/mean-data', function (err, db) {
+      if (err) {
+        db.close();
+        return handleError(res, err);
+      }
+      var myCollect = db.collection(source.location);
+      myCollect.find({}).toArray(function (err, records) {
+        db.close();
+        if (err) { return handleError(res, err); }
+        return res.json(records);
+      });
+    });
+  });
+
+  
 };
 
 // Get list of Sources

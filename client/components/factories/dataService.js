@@ -6,7 +6,7 @@ angular.module('mean.factories').factory('DataService', function ($http, $log) {
 	fac.filters = [];
 
 	fac.get = function (sourceId) {
-		$http.get('api/data/' + sourceId)
+		$http.get('api/sources/data/' + sourceId)
 		.success(function (res) {
 			fac.list[sourceId] = res;
 			fac.filtes[sourceId] = {

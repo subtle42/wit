@@ -7,6 +7,7 @@ var multer = require('multer');
 
 var router = express.Router();
 
+router.get('/data/:id', auth.isAuthenticated(), controller.getDataAll);
 router.get('/byuser', auth.isAuthenticated(), controller.byUser);
 router.get('/', controller.index);
 router.get('/:id', controller.show);

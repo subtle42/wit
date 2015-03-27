@@ -5,16 +5,24 @@ angular.module('meanApp')
 	$scope.sources = $rootScope.sources.list;
 	$scope.dsSelected = undefined;
 	$scope.typeSelected = undefined;
+	$scope.measureCount = 0;
+	$scope.groupCount = 0;
 	
 	$scope.chartImages = [{
 		src: 'images/lineChart.png',
-		type: 'line'
+		type: 'line',
+		dimension: 1,
+		group: 1
 	}, {
 		src: 'images/pieChart.png',
-		type: 'pie'
+		type: 'pie',
+		dimension: 1,
+		group: 1
 	}, {
 		src: 'images/histogram.png',
-		type: 'histogram'
+		type: 'histogram',
+		dimension: 1,
+		group: 0
 	}];
 
 	$scope.pages = {
@@ -43,11 +51,31 @@ angular.module('meanApp')
 	};
 
 	$scope.selectSource = function (myDataSource) {
+		$scope.measureCount = 0;
+		$scope.groupCount = 0;
+
 		if ($scope.dsSelected) {
 			$scope.dsSelected.active = false;
 		}
 		$scope.dsSelected = myDataSource;
 		$scope.dsSelected.active = true;
+
+		angular.forEach($scope.dsSelected.columns, function (col) {
+			if (col.type === 'number') {
+				$scope.measureCount++;
+			} else if (col.type === 'group') {
+				$scope.groupCount++;
+			}
+		});
+	};
+
+	$scope.validChart = function (chart) {
+		if (chart.dimension > $scope.measureCount) {
+			return false;
+		} else if (chart.group > $scope.groupCount) {
+			return false;
+		}
+		return true;
 	};
 
 	$scope.addWidgetFinish = function () {
