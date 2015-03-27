@@ -2,7 +2,9 @@ div(ng-hide="pages.page1")
 	div.well
 		h3 Select a Chart Type
 		button(ng-repeat="myImg in chartImages",
-			ng-class="{'btn': true}")
+			ng-class="{'btn': true, 'btn-warning': myImg.active == true}",
+			ng-click="selectChartType(myImg)")
+			| {{myImg.type}}
 div(ng-hide="pages.page2")
 	h3.center-block
 		| Select Data Source
@@ -10,17 +12,17 @@ div(ng-hide="pages.page2")
 		div.left-inner-addon
 			i.fa.fa-search
 			input.form-control(type="text",
-				ng-model="search.title",
+				ng-model="search.name",
 				placehodler="Search Data Sources")
 		ul.list-group(style="height:200px; overflow-y:auto")
-			a(ng-repeat="ds in dataSources | filter:search:strict",
+			a(ng-repeat="ds in sources | filter:search:strict",
 				ng-click="selectSource(ds)",
 				ng-class="{'list-group-item': true,\
 				'active': ds.active,\
 				'list-group-item-success': ds.type == 1,\
 				'list-group-item-info': ds.type == 2,\
 				'list-group-item-warning': ds.type == 3}")
-				| {{ds.title}}
+				| {{ds.name}}
 				span.pull-right
 				i(ng-class="{'fa fa-lg': true,\
 					'fa-file-excel-o': ds.type == 1,\
@@ -28,13 +30,13 @@ div(ng-hide="pages.page2")
 					'fa-code': ds.type == 3}")
 				i.fa.fa-lg.fa-share-alt
 	div.well(style="float:right; width:50%")
-		| Name {{dsSelected.title}}
+		| Name: {{dsSelected.name}}
 		br
 		| Uploaded On: {{dsSelected.updated | date: medium}}
 		br
 		| Uploaded By: {{dsSelected.createdBy}}
 		br
-		| Row Count: {{dsSelected.rowCount}}
+		| Row Count: {{dsSelected.count}}
 		br
 		| Column Count: {{dsSelected.columns.length}}
 	div(style="height:240px")
@@ -49,6 +51,8 @@ div.modal-footer
 	button(ng-show="pages.page1",
 		ng-class="{'btn btn-lg btn-primary': true, 'disabled': !dsSelected}",
 		ng-click="next()")
+		| Next
+		i.fa.fa-chevron-right
 	button(ng-show="pages.page2",
 		ng-class="{'btn btn-lg btn-primary': true, 'disabled': !typeSelected}",
 		ng-click="addWidgetFinish()")

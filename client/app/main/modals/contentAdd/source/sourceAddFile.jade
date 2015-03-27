@@ -7,10 +7,13 @@ div(ng-show="pages.page1")
 				b 
 					| Drop file here to upload
 					br
+					br
 					| or
+				br
 				br
 				button.btn.btn-default(type="file",
 					ng-file-select="onFileSelect($files)")
+					| Select File
 	progressbar.progress-striped.active(ng-hide="fileProgress == 0",
 		value="fileProgress")
 

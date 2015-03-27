@@ -1,46 +1,104 @@
 /**
  * Using Rails-like standard naming convention for endpoints.
- * GET     /sources              ->  index
- * POST    /sources              ->  create
- * GET     /sources/:id          ->  show
- * PUT     /sources/:id          ->  update
- * DELETE  /sources/:id          ->  destroy
+ * GET     /Sources              ->  index
+ * POST    /Sources              ->  create
+ * GET     /Sources/:id          ->  show
+ * PUT     /Sources/:id          ->  update
+ * DELETE  /Sources/:id          ->  destroy
  */
 
 'use strict';
 
 var _ = require('lodash');
-var source = require('./source.model');
+var MongoClient = require('mongodb').MongoClient;
+var fs = require('fs');
+var csvParse = require('csv-parse');
+var auth = require('../../auth/auth.service');
 
-// Get list of sources
+var Source = require('./Source.model');
+
+// Get list of Sources by user
+exports.byUser = function (req, res) {
+  console.log(req.user._id);
+  Source.find({createdBy: req.user._id}, function (err, sources) {
+    if(err) { return handleError(res, err);}
+    return res.json(sources);
+  });
+};
+
+// Get list of Sources
 exports.index = function(req, res) {
-  source.find(function (err, sources) {
+  Source.find(function (err, sources) {
     if(err) { return handleError(res, err); }
     return res.json(200, sources);
   });
 };
 
-// Get a single source
+// Get a single Source
 exports.show = function(req, res) {
-  source.findById(req.params.id, function (err, source) {
+  Source.findById(req.params.id, function (err, source) {
     if(err) { return handleError(res, err); }
-    if(!source) { return res.send(404); }
+    if(!Source) { return res.send(404); }
     return res.json(source);
   });
 };
 
-// Creates a new source in the DB.
+// Creates a new Source in the DB.
 exports.create = function(req, res) {
-  source.create(req.body, function(err, source) {
-    if(err) { return handleError(res, err); }
-    return res.json(201, source);
+  var myFile = req.files.file;
+  console.log(req);
+  MongoClient.connect('mongodb://127.0.0.1:27017/mean-data', function (err, db) {
+    if (err) { handleError(res, err); }
+
+    var location = 'data_' + Date.now();
+    var myCollection = db.collection(location);
+    //var batch = myCollection.initializeUnorderedBulkOp();
+    var headers = [];
+    var count = 0;
+    var record;
+
+    var parser = csvParse({delimiter: ',',
+      skip_empty_lines: true,
+      trim: true,
+      auto_parse: true
+    });
+    // Writable stream api
+    parser.on('readable', function () {
+      while (record = parser.read()) {
+        var newRecord = {};
+        record.forEach(function (e, i) {
+          newRecord[i] = e;
+        });
+        if (count !== 0) {
+          myCollection.insert(newRecord, function (err, doc) {
+            if (err) { console.log(err); }
+          });
+        } else {
+          headers = newRecord;
+        }
+        count++;
+      }
+    }).on('error', function (err) {
+      console.log(err);
+    }).on('finish', function () {
+      fs.unlink(myFile.path, function (err) {
+        if (err) { console.log(err); }
+        console.log('tmp file deleted');
+      });
+      db.close();
+      createNewSource(myFile, location, headers, count--, req.body.data, function (source) {
+        return res.json(source);
+      });
+    });
+
+    fs.createReadStream(myFile.path).pipe(parser);
   });
 };
 
-// Updates an existing source in the DB.
+// Updates an existing Source in the DB.
 exports.update = function(req, res) {
   if(req.body._id) { delete req.body._id; }
-  source.findById(req.params.id, function (err, source) {
+  Source.findById(req.params.id, function (err, source) {
     if (err) { return handleError(res, err); }
     if(!source) { return res.send(404); }
     var updated = _.merge(source, req.body);
@@ -51,18 +109,118 @@ exports.update = function(req, res) {
   });
 };
 
-// Deletes a source from the DB.
+// Deletes a Source from the DB.
 exports.destroy = function(req, res) {
-  source.findById(req.params.id, function (err, source) {
+  Source.findById(req.params.id, function (err, source) {
     if(err) { return handleError(res, err); }
     if(!source) { return res.send(404); }
-    source.remove(function(err) {
+    Source.remove(function(err) {
       if(err) { return handleError(res, err); }
       return res.send(204);
     });
   });
 };
 
-function handleError(res, err) {
+function handleError(res, err, db) {
+  if (db) { db.close(); }
   return res.send(500, err);
-}
+};
+
+function createNewSource(myFile, location, headers, count, userId, callback) {
+  var columnList = [];
+  investigateColumns(location, headers, function (myColumns) {
+    console.log('userId: ' + userId);
+    var mySource = new Source({
+      name: myFile.originalname,
+      updated: Date.now(),
+      count: count,
+      size: 0,
+      location: location,
+      type: 1,
+      createdBy: userId,
+      columns: myColumns
+    });
+
+    Source.create(mySource, function (err, source) {
+      if (err) { return handleError(res, err); }
+      if (callback) { callback(source); }
+    });
+  });
+};
+
+function investigateColumns (location, headers, callback) {
+  MongoClient.connect('mongodb://127.0.0.1:27017/mean-data', function (err, db) {
+    if (err) { handleError(res, err); }
+    db.collection(location).find({}).limit(100).toArray(function (err, docs) {
+      sortByColumn(docs, headers, function (columns) {
+        callback(columns);
+      });
+    });
+  });
+};
+
+function sortByColumn (docs, headers, callback) {
+  var columns = [];
+  var response = [];
+
+  for (var key in docs[0]) {
+    columns.push([]);
+  }
+
+  docs.forEach(function (col, i) {
+    var j = 0;
+    for (var key in col) {
+      columns[j].push(col[key]);
+      j++;
+    }
+  });
+
+  columns.forEach(function (col, i) {
+    findColumnBaseType(col, function (baseType) {
+      response.push({
+        ref: i,
+        name: headers[i],
+        type: baseType
+      });
+      if (response.length === columns.length) {
+        callback(response);
+      }
+    });
+  });
+};
+
+function findColumnBaseType (column, callback) {
+  var type = {
+    group: 0,
+    number: 0,
+    date: 0,
+    text: 0
+  };
+  var groupList = [];
+  var response = null;
+
+  column.forEach(function (entry) {
+    if (typeof entry === 'number') {
+      type.number++;
+    //} else if (new Date(entry) !== 'Invalid Date') {
+    //  type.date++;
+    } else if (entry.length > 100) {
+      type.text++;
+    } else if (groupList.indexOf(entry) !== -1) {
+      type.group++;
+    }
+    groupList.push(entry);
+  });
+
+  if (type.number > column.length*.9) {
+    response = 'number';
+  } else if (type.date > column.length*.8) {
+    response = 'date';
+  } else if (type.group > column.length*.5) {
+    response = 'group';
+  } else {
+    response = 'text';
+  }
+
+  callback(response);
+};

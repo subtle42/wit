@@ -1,17 +1,17 @@
 'use strict';
 
 angular.module('meanApp')
-.controller('AddContentModal', function ($scope, $rootScope, $log, $modalInstance, sources) {
-	$scope.sources = sources;
-	$scope.disableAddWidget = $scope.sources.length == 0 ? true : false;
+.controller('ContentAddModalCtrl', function ($scope, $rootScope, $log, $modalInstance) {
+	$scope.sources = $rootScope.sources;
+	$scope.disableAddWidget = $scope.sources.list.length == 0 ? true : false;
 	
 	$scope.addWidgetTab = {
-		active: Object.keys($scope.sources).length > 0 ? true : false
-		,disabled: Object.keys($scope.sources).length == 0 ? true : false
+		active: $scope.sources.list.length > 0 ? true : false,
+		disabled: $scope.sources.list.length == 0 ? true : false
 	};
 	$scope.addDataSourceTab = {
-		active: Object.keys($scope.sources).length == 0 ? true : false
-		,disabled: false	
+		active: Object.keys($scope.sources.list).length == 0 ? true : false,
+		disabled: false	
 	};
 
 	$scope.myCancel = function () {

@@ -14,6 +14,7 @@ module.exports = function(app) {
   app.use('/api/widgets', require('./api/widget'));
   app.use('/api/pages', require('./api/page'));
   app.use('/api/collections', require('./api/collection'));
+  app.use('/api/sources', require('./api/source'));
 
   app.use('/auth', require('./auth'));
   

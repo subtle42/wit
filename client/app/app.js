@@ -6,8 +6,10 @@ angular.module('meanApp', [
   'ngSanitize',
   'ngRoute',
   'ui.bootstrap',
+  'angularFileUpload',
   'meanApp.directives',
-  'mean.factories'
+  'mean.factories',
+  'ui.sortable'
 ])
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider

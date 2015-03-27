@@ -15,7 +15,6 @@ var Collect = require('./collection.model');
 // Get all collections for current user
 exports.allByUser = function (req, res) {
   var userId = req.user._id;
-  console.log('userId: ' + userId);
 
   Collect.find({ userId: userId}, function (err, collects) {
     if(err) { return handleError(res, err); }

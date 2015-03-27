@@ -7,7 +7,7 @@ angular.module('meanApp')
 			scope: {
 				widget: '=widget'
 			},
-			templateUrl: 'main/widget/widget.html',
+			templateUrl: 'app/main/widget/widget.html',
 			controller: widgetCtrl
 		}
 	}
@@ -132,13 +132,20 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 
 	$scope.remove = function () {
 		var myModal = $modal.open({
-			templateUrl: 'main/modals/deleteWidget/deleteWidget.html',
+			templateUrl: 'app/main/modals/widgetDelete/widgetDelete.html',
 			size: 'sm',
-			controller: 'DeleteWidgetModalCtrl'
+			controller: 'DeleteWidgetModalCtrl',
+			resolve: {
+				widget: function () {
+					return $scope.widget;
+				}
+			}
 		});
 		
 		myModal.result.then(function () {
-			$rootScope.widgets.remove($scope.widget._id, $scope.widget.pageId);
+			$rootScope.widgets.remove($scope.widget);
+		}, function () {
+			$log.log('delete widget modal was canceled');
 		});
 	};
 

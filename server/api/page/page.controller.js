@@ -11,8 +11,35 @@
 
 var _ = require('lodash');
 var Page = require('./page.model');
+var Collect = require('../collection/collection.model');
 
 exports.getByCollection = function (req, res) {
+  Page.find({collectionId: req.params.id}, function (err, pages) {
+    if(err) { return handleError(res, err); }
+    if(pages.length === 0) {
+      var newPage = new Page({
+        collectionId: req.params.id
+      });
+      Page.create(newPage, function (err, page) {
+        if(err) { return handleError(res, err); }
+        return res.json([page]);
+      });
+    } else {
+      return res.json(pages);
+    }
+  });
+};
+
+exports.getByPageList = function (req, res) {
+  // Get list of all pages in a collection
+  Collect.findById(req.params.id, function (err, myCollect) {
+    if(err) { return handleError(res, err); }
+    // Search for each page found in list
+    Page.find({_id: {$in: myCollect.pageList}}, function (err, pages) {
+      if(err) { return handleError(res, err); }
+      return res.json(pages);
+    });
+  });
   Page.find({collectionId: req.params.id}, function (err, pages) {
     if(err) { return handleError(res, err); }
     if(pages.length === 0) {

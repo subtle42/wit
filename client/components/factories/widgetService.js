@@ -14,33 +14,25 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 		});
 	};
 
-	fac.remove = function (widgetId, pageId) {
-		var index = -1,
-			count = 0;
-		angular.forEach(fac.list, function (w) {
-			if (w._id === widgetId) {
-				index = count;
+	fac.remove = function (widget) {
+		$http.delete('api/widgets/' + widget._id)
+		.success(function (res) {
+			var index = fac.list.indexOf(widget);
+			if (index !== -1) {
+				fac.list.splice(index, 1);	
 			}
-			count++;
-		});
-
-		$http.post('api/widgetRemove', {
-			widgetid: widgetId,
-			pageid: pageId	
-		}).success(function (res) {
-			fac.list.splice(index, 1);
 		}).error(function (err) {
 			$log.log(err);
 		});
 	};
 
-	fac.add = function (type, sourceId, pageId) {
-		var myConfig = fac._getChartDefaults(type, sourceId);
+	fac.add = function (type, source, page) {
+		var myConfig = fac._getChartDefaults(type, source);
 
-		$http.post('api/widget', {
+		$http.post('api/widgets', {
 			type: type,
-			sourceId: sourceId,
-			pageId: pageId,
+			sourceId: source._id,
+			pageId: page._id,
 			series: myConfig.series,
 			groups: myConfig.groups
 		}).success(function (newWidget) {
@@ -60,10 +52,9 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 		});
 	};
 
-	fac._getChartDefaults = function (type, sourceId) {
+	fac._getChartDefaults = function (type, source) {
 		var series = [];
 		var groups = [];
-		var source = $rootScope.sources.get(sourceId);
 
 		source.columns.forEach(function (col) {
 			if (col.type === 'number' && series.length === 0) {

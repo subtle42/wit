@@ -7,14 +7,14 @@ div.modal-body
 			heading="Add Widget",
 			active="addWidgetTab.active")
 			div(ng-controller="AddWidgetCtrl",
-				ng-include="'app/modals/contentAdd/widget/widgetAdd.html'")
+				ng-include="'app/main/modals/contentAdd/widget/widgetAdd.html'")
 		tab(heading="Add Data Source",
 			active="addDataSourceTab.active",
 			disabled="addDataSourceTab.disabled")
 			tabset(justified="true")
 				tab(heading="File Upload")
 					div(ng-controller="AddSourceFileCtrl",
-						ng-include="'app/modals/contentAdd/source/sourceAddFile.html'")
+						ng-include="'app/main/modals/contentAdd/source/sourceAddFile.html'")
 				tab(heading="Database",
 					disabled="true")
 				tab(heading="JSON Feed",

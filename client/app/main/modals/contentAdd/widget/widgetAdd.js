@@ -2,14 +2,19 @@
 
 angular.module('meanApp')
 .controller('AddWidgetCtrl', function ($scope, $rootScope, $log) {
-	$scope.dataSources = $rootScope.sources.dataSources;
+	$scope.sources = $rootScope.sources.list;
 	$scope.dsSelected = undefined;
 	$scope.typeSelected = undefined;
 	
 	$scope.chartImages = [{
 		src: 'images/lineChart.png',
-		active: false,
 		type: 'line'
+	}, {
+		src: 'images/pieChart.png',
+		type: 'pie'
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram'
 	}];
 
 	$scope.pages = {
@@ -32,14 +37,15 @@ angular.module('meanApp')
 	};
 
 	$scope.selectChartType = function (imageObject) {
-		$scope.typeSelected = imageObject.type;
+		if ($scope.typeSelected) { $scope.typeSelected.active = false; }
+		$scope.typeSelected = imageObject;
+		$scope.typeSelected.active = true;
 	};
 
 	$scope.selectSource = function (myDataSource) {
 		if ($scope.dsSelected) {
 			$scope.dsSelected.active = false;
 		}
-		//myDataSource.active = true;
 		$scope.dsSelected = myDataSource;
 		$scope.dsSelected.active = true;
 	};
@@ -48,12 +54,12 @@ angular.module('meanApp')
 		if (!$scope.typeSelected) {
 			return;
 		}
-		var pageId = $rootScope.pages.list[$rootScope.pages.activeIndex]._id;
-		$rootScope.widgets.add($scope.typeSelected, $scope.dsSelected._id, pageId);
+		var page = $rootScope.pages.selected;
+		$rootScope.widgets.add($scope.typeSelected.type, $scope.dsSelected, page);
 		$rootScope.$broadcast('WidgetAdded');
 	};
 
-	$scope.$on('uploadFinished', function (source) {
+	$scope.$on('uploadFinished', function (myScope, source) {
 		$scope.dsSelected = source;
 		$scope.next();
 	});

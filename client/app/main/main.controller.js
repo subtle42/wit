@@ -1,11 +1,13 @@
 'use strict';
 
 angular.module('meanApp')
-  .controller('MainCtrl', function ($scope, $rootScope, $http, $modal, $log, CollectionService, PageService, WidgetService) {
-    $scope.awesomeThings = [];
+  .controller('MainCtrl', function ($scope, $rootScope, $timeout, $http, $modal, $log, CollectionService, PageService, WidgetService, SourceService, UserService, DataService) {
     $rootScope.collections = CollectionService;
     $rootScope.pages = PageService;
     $rootScope.widgets = WidgetService;
+    $rootScope.sources = SourceService;
+    $rootScope.data = DataService;
+    $rootScope.user = UserService;
 
     // Sorting options for page tabs
     $scope.sortingPages = false;
@@ -20,17 +22,63 @@ angular.module('meanApp')
         $timeout(function () {
           $scope.sortingPages = false;
         }, 0);
-        $log.log('setting order');
-        $rootScope.pages.setOrder();
+        /*
+        var list = [];
+        angular.forEach($rootScope.pages.list, function (page) {
+          list.push(page._id);
+        });
+        $rootScope.collections.selected.pageList = list;
+        $rootScope.collections.update($rootScope.collections.selected);
+        */
       }
+    };
+
+    $scope.widgetSortOptions = {
+      connectWith: 'widget-container',
+      placeholder: "ui-state-highlight"
+    };
+
+    $scope.contentAddModal = function () {
+      var myModal = $modal.open({
+        templateUrl: 'app/main/modals/contentAdd/contentAdd.html',
+        size: 'lg',
+        controller: 'ContentAddModalCtrl'
+      });
+
+      myModal.result.then(function (config) {
+        angular.forEach($rootScope.sources.list, function (source) {
+          if (source.active) { delete source.active; }
+        });
+      }, function () {
+        angular.forEach($rootScope.sources.list, function (source) {
+          if (source.active) { delete source.active; }
+        });
+        $log.log('content modal was canceled');
+      });
     };
 
     $scope.pageLoad = function () {
       $rootScope.collections.getByUser(function () {
         $rootScope.pages.getByCollection($rootScope.collections.selected._id, function () {
-          $rootScope.widgets.getByPage($rootScope.pages.selected._id);
+          $log.log('loading widgets');
+          $rootScope.widgets.getByPage($rootScope.pages.selected._id, function () {
+            $log.log('everyone done');
+            var sourceList = [];
+            angular.forEach($rootScope.widgets.list, function (myWidget) {
+              if (sourceList.indexOf(myWidget.sourceId) === -1) {
+                sourceList.push(myWidget.sourceId);
+              }
+            });
+            angular.forEach(sourceList, function (sourceId) {
+              $rootScope.data.get(sourceId);
+            });
+          });
         });
       });
+
+      // TODO: remove need for creating new source to not require user profile
+      $rootScope.user.get();
+      $rootScope.sources.getByUser();
     };
 
     $scope.pageSwitch = function (page) {

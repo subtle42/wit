@@ -20,7 +20,6 @@ angular.module('meanApp')
 	$scope.fileDone = function () {
 		$scope.pages.page1 = false;
 		$scope.pages.page2 = true;
-
 	};
 
 	$scope.onFileSelect = function ($files) {
@@ -29,19 +28,8 @@ angular.module('meanApp')
 			return;
 		}
 
-		$upload.upload({
-			url: 'api/uploadsource'
-			,method: 'POST'
-			,data: {}
-			,file: $files[0]
-		})
-		.progress(function (evt) {
-			console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
-		})
-		.success(function (source) {
-			$rootScope.sources.add(source);
+		$rootScope.sources.add($files, function (source) {
 			$rootScope.$broadcast('uploadFinished', source);
-			console.log(source);
 		});
 	};
 

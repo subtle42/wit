@@ -8,16 +8,11 @@ var WidgetSchema = new Schema({
   type: String,
   sourceId: String,
   pageId: String,
-  series: [{
-    forumla: { type: String, default: 'sum' },
-    ref: Number
-  }],
-  groups: [{
-    ref: Number
-  }],
+  series: { type: Array, default: [] },
+  groups: { type: Array, default: [] },
   margins: { type: Object, default: {top: 10, bottom: 20, left: 40, right: 10} },
   collapse: { type: Boolean, default: false },
-  height: { type: Number, default: 350 }
+  height: { type: Number, default: 300 }
 });
 
 module.exports = mongoose.model('Widget', WidgetSchema);

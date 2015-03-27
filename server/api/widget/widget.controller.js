@@ -41,7 +41,16 @@ exports.show = function(req, res) {
 
 // Creates a new widget in the DB.
 exports.create = function(req, res) {
-  Widget.create(req.body, function(err, widget) {
+  var newWidget = new Widget({
+    name: 'asdf',
+    type: req.body.type,
+    sourceId: req.body.sourceId,
+    pageId: req.body.pageId,
+    series: req.body.series,
+    groups: req.body.groups,
+  });
+  console.log(newWidget);
+  Widget.create(newWidget, function(err, widget) {
     if(err) { return handleError(res, err); }
     return res.json(201, widget);
   });

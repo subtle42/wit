@@ -1,4 +1,4 @@
-div.widget-main.panel.panel-primary(id="{{widget.title}}",
+div.widget-main.panel.panel-primary(id="{{widget.name}}",
 	ng-class="{'expandWidget': widget.maximize}")
 	div.panel-heading.widget-header(ng-dblclick="maximize()")
 		h3.panel-title
@@ -11,8 +11,8 @@ div.widget-main.panel.panel-primary(id="{{widget.title}}",
 				stop-event="dblclick",
 				ng-dblclick="editTitle()",
 				style="padding-left:10px")
-				| {{widget.title}}
-			input(style="color:black",
+				| {{widget.name}}
+			//-input(style="color:black",
 				stop-event="dblclick",
 				ng-blur="editTitle()",
 				focus-title="showTitleEdit",
@@ -31,6 +31,7 @@ div.widget-main.panel.panel-primary(id="{{widget.title}}",
 				button.btn.btn-xs.btn-primary(ng-click="remove(widget)",
 					stop-event="dblclick",
 					type="button")
+					span.glyphicon.glyphicon-remove
 	div.panel-footer(ng-hide="widget.collapse",
 		style="padding-bottom:5px; padding-top:5px")
 		button.btn.btn-xs(type="button")
@@ -51,8 +52,8 @@ div.widget-main.panel.panel-primary(id="{{widget.title}}",
 					'fa-lock': widget.locked,\
 					'fa-unlock': !widget.locked}")
 	div.panel-body.widget-content(ng-hide="widget.collapse",
-		ng-style="height: widget.height + 64")
-		center
+		ng-style="{'height': widget.height + 64}")
+		//-center
 			ul(ui-sortable="sortOptions",
 				ng-model="widget.series",
 				style="list-style-type:none")
@@ -64,9 +65,9 @@ div.widget-main.panel.panel-primary(id="{{widget.title}}",
 					button.btn.btn-default.btn-xs(style="display:inline",
 						ng-hide="widget.series.length > 2 || seriesMoving")
 
-		div(d3Chart)
+		//-div(d3Chart)
 
-		center
+		//-center
 			ul(ui-sortable="sortOptions",
 				ng-model="widget.groups",
 				style="list-style-type:none")
