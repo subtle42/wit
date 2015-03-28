@@ -9,6 +9,7 @@ angular.module('meanApp', [
   'angularFileUpload',
   'meanApp.directives',
   'mean.factories',
+  'mean.filters',
   'ui.sortable'
 ])
   .config(function ($routeProvider, $locationProvider, $httpProvider) {

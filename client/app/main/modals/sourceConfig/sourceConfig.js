@@ -2,7 +2,7 @@
 
 angular.module('meanApp')
 .controller('SourceConfigCtrl', function ($scope, $rootScope, $modalInstance, $log) {
-	$scope.sourceList = $rootScope.sources.dataSources;
+	$scope.sourceList = $rootScope.sources.list;
 	$scope.focus = {};
 	$scope.colTypes = ['group', 'number', 'date', 'text'];
 	

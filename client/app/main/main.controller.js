@@ -38,25 +38,6 @@ angular.module('meanApp')
       placeholder: "ui-state-highlight"
     };
 
-    $scope.contentAddModal = function () {
-      var myModal = $modal.open({
-        templateUrl: 'app/main/modals/contentAdd/contentAdd.html',
-        size: 'lg',
-        controller: 'ContentAddModalCtrl'
-      });
-
-      myModal.result.then(function (config) {
-        angular.forEach($rootScope.sources.list, function (source) {
-          if (source.active) { delete source.active; }
-        });
-      }, function () {
-        angular.forEach($rootScope.sources.list, function (source) {
-          if (source.active) { delete source.active; }
-        });
-        $log.log('content modal was canceled');
-      });
-    };
-
     $scope.pageLoad = function () {
       // Getting all collections
       $rootScope.collections.getByUser(function () {
@@ -88,6 +69,48 @@ angular.module('meanApp')
       $rootScope.pages.updateSelected(page, function () {
         $rootScope.widgets.getByPage(page._id);
       });
+    };
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    // MODALS
+    /////////////////////////////////////////////////////////////////////////////////////
+
+    $scope.contentAddModal = function () {
+      var myModal = $modal.open({
+        templateUrl: 'app/main/modals/contentAdd/contentAdd.html',
+        size: 'lg',
+        controller: 'ContentAddModalCtrl'
+      });
+
+      myModal.result.then(function (config) {
+        angular.forEach($rootScope.sources.list, function (source) {
+          if (source.active) { delete source.active; }
+        });
+      }, function () {
+        angular.forEach($rootScope.sources.list, function (source) {
+          if (source.active) { delete source.active; }
+        });
+        $log.log('content modal was canceled');
+      });
+    };
+
+    $scope.sourceConfigModal = function () {
+      var myModal = $modal.open({
+        templateUrl: 'app/main/modals/sourceConfig/sourceConfig.html',
+        size: 'lg',
+        controller: 'SourceConfigCtrl'
+      });
+
+      myModal.result.then(function (source) {
+        angular.forEach($rootScope.sources.list, function (mySource) {
+          if (source._id === mySource._id) {
+            mySource.columns = source.columns;
+            $rootScope.sources.update(mySource);
+          }
+        });
+      }, function () {
+        $log.log('souce config modal was canceled');
+      })
     };
 
     $scope.addPageModal = function () {

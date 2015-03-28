@@ -16,6 +16,8 @@ angular.module('meanApp')
 var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 	$scope.source = {};
 	$scope.seriesMoving = false;
+	$scope.seriesLimit = 0;
+	$scope.groupsLimit = 0;
 
 	$scope.sortOptions = {
 		axis: 'x',
@@ -33,11 +35,37 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 	};
 
 	$scope.init = function () {
-		angular.forEach($rootScope.sources.dataSources, function (source) {
+		angular.forEach($rootScope.sources.list, function (source) {
 			if (source._id === $scope.widget.sourceId) {
 				$scope.source = source;
 			}
 		});
+		$scope.seriesLimit($scope.widget.type);
+		$scope.groupsLimit($scope.widget.type);
+	};
+
+	$scope.seriesLimit = function (type) {
+		var limit1 = ['histogram'];
+		var limit2 = [];
+		if (limit1.indexOf(type) !== -1) {
+			$scope.seriesLimit = 1;
+		} else if (limit2.indexOf(type) !== -1) {
+			$scope.seriesLimit = 2;
+		} else {
+			$scope.seriesLimit = 3;
+		}
+	};
+
+	$scope.groupsLimit = function (type) {
+		var limit0 = ['histogram'];
+		var limit1 = ['pie'];
+		if (limit0.indexOf(type) !== -1) {
+			$scope.groupsLimit = 0;
+		} else if (limit1.indexOf(type) !== -1) {
+			$scope.groupsLimit = 1;
+		} else {
+			$scope.groupsLimit = 2;
+		}
 	};
 
 	$scope.addSerie = function () {

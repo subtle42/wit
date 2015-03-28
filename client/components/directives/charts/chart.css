@@ -1,0 +1,36 @@
+div.chart {
+  font: 10px sans-serif;
+}
+
+.bar rect {
+  fill: steelblue;
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush rect.extent {
+	fill: steelblue;;
+	fill0opacity: .125;
+}
+
+.brush .resize path {
+	fill: #eee;
+	stroke: #666;
+}
+
+.background {
+	fill: #ccc;
+}
+
+.foreground {
+	fill: steelblue;
+}

@@ -1,0 +1,15 @@
+select(ng-model="formulaSelected",
+	ng-change="updateConfig()",
+	ng-options="form.label for form in formulaOptions track by form.value")
+|  of 
+select(ng-model="columnSelected",
+	ng-change="updateConfig()",
+	ng-options="col.name for col in source.columns | columnType:'number' track by col.ref")
+button.close.btn-xs(type="button",
+	style="float:none",
+	ng-click="remove(index)",
+	ng-hide="count() == 1")
+	span(aria-hidden="true")
+		| &times;
+	span.sr-only
+		| Close
