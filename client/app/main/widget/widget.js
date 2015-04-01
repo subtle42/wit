@@ -18,20 +18,11 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 	$scope.seriesMoving = false;
 	$scope.seriesLimit = 0;
 	$scope.groupsLimit = 0;
+	$scope.total = 0;
+	$scope.subset = 0;
 
 	$scope.sortOptions = {
-		axis: 'x',
-		start: function (e, ui) {
-			$timeout(function () {
-				$scope.seriesMoving = true;
-			}, 0);
-		},
-		stop: function (e, ui) {
-			$timeout(function () {
-				$scope.seriesMoving = false;
-			}, 0);
-			$rootScope.widgets.update($scope.widget);
-		}
+		axis: 'x'
 	};
 
 	$scope.init = function () {
@@ -40,6 +31,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 				$scope.source = source;
 			}
 		});
+		$scope.total = $scope.source.count;
 		$scope.seriesLimit($scope.widget.type);
 		$scope.groupsLimit($scope.widget.type);
 	};
@@ -179,7 +171,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 
 	$scope.openConfigMenu = function () {
 		var myModal = $modal.open({
-			templateUrl: 'main/modals/widgetConfig/widgetConfig.html',
+			templateUrl: 'app/main/modals/widgetConfig/widgetConfig.html',
 			controller: 'WidgetConfigCtrl',
 			size: 'lg',
 			resolve: {

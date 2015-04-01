@@ -43,9 +43,8 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 	};
 
 	fac.update = function (widget) {
-		$http.post('api/widgetUpdate', {
-			widget: widget
-		}).success(function (res) {
+		$http.put('api/widgets', widget)
+		.success(function (res) {
 			$log.log(res);
 		}).error(function (err) {
 			$log.log(err);

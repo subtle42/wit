@@ -1,13 +1,13 @@
 'use strict';
 
-angular.module('meanApp.charts')
-.directive('d3chart', function ($timeout, $window, $rootScope) {
+angular.module('mean.charts')
+.directive('d3chart', function ($timeout, $window, $rootScope, $log) {
     return {
         restrict: 'A',
         link: function postLink($scope, element, attrs) {
             if ($rootScope.data.list[$scope.widget.sourceId]) {
                 $timeout(function () {
-                    $scope.draw();
+                    $scope.draw(element);
                 }, 50);
             } else {
                 console.log('looking for: ' + $scope.widget.sourceId + '_loaded');
@@ -16,16 +16,7 @@ angular.module('meanApp.charts')
                     if ($scope.chart) {
                         return;
                     }
-                    $scope.widget.width = element.width();
-                    var data = crossfilter($rootScope.data.list[$scope.widget.sourceId]);
-                    var myDim = data.dimension(function (d) {
-                        //return d['1'];
-                        return d[parseInt($scope.widget.groups[0].ref)];
-                    });
-                    var total = myDim.group().reduceSum(function (d) {
-                        return d[parseInt($scope.widget.series[0].ref)];
-                    });
-                    $scope.chart = new D3BarChart(element[0], $scope.widget, total.all());
+                    $scope.draw(element);
                 });
             }
             
@@ -41,77 +32,73 @@ angular.module('meanApp.charts')
                     $scope.chart.svg.remove();
                     delete $scope.chart;
                 }
+                $scope.draw(element);
+                return;
+
                 $scope.widget.width = element.width();
-                var data = crossfilter($rootScope.data.list[$scope.widget.sourceId]);
-                var myDim = data.dimension(function (d) {
-                    //return d['1'];
-                    return d[parseInt($scope.widget.groups[0].ref)];
+                
+                angular.forEach($scope.widget.series, function (serie) {
+                    if (!$scope.data[serie.ref]) {
+                        var colName = parseInt(serie.ref);
+                        $scope.data[colName] = $scope.data.main.dimension(function (d) {
+                            return d[colName];
+                        });
+                    }
                 });
-                var total = myDim.group().reduceSum(function (d) {
-                    return d[parseInt($scope.widget.series[0].ref)];
-                });
-                $scope.chart = new D3BarChart(element[0], $scope.widget, total.all());
+                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0]);
+                $log.log($scope.chart);
+
+                $scope.chart.buildFocus();
+                $scope.chart.buildAxisX();
+                $scope.chart.buildDisplay();
+                $scope.chart.buildBarNumbers();
             };
 
             $scope.draw = function (element) {
                 $scope.widget.width = element.width();
-                    $scope.data = $rootScope.data.list[$scope.source._id];
+                $scope.data = $rootScope.data.list[$scope.source._id];
 
-                    angular.forEach($scope.widget.series, function (serie) {
-                        if (!$scope.data[serie.ref]) {
-                            var colName = parseInt(serie.ref);
-                            $scope.data[colName] = $scope.data.main.dimension(function (d) {
-                                return d[colName];
-                            });
-                        }
-                    });
-                    /*
-                    var total = myDim.group().reduceSum(function (d) {
-                        return d[parseInt($scope.widget.series[0].ref)];
-                    });
-                    */
-                    //$scope.chart = new D3BarChart(element[0], $scope.widget, total.all());
-
-                    $scope.chart = new D3Histogram()
-                        .dimension($scope.data[$scope.widget.series[0]])
-                        .margins($scope.widget.margins);
-                    $log.log(chart);
+                angular.forEach($scope.widget.series, function (serie) {
+                    if (!$scope.data[serie.ref]) {
+                        var colName = parseInt(serie.ref);
+                        $scope.data[colName] = $scope.data.main.dimension(function (d) {
+                            return d[colName];
+                        });
+                    }
+                });
+                $scope.subset = $rootScope.data.list[$scope.source._id].all.value();
+                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0]);
+                $scope.chart.buildFocus();
+                $scope.chart.buildAxisX();
+                $scope.chart.buildDisplay();
+                $scope.chart.buildBarNumbers();
             };
         }
     };
 });
 
-var _D3Chart = function () {
+var _D3Chart = function (config, data, myDirEle) {
     var chart = {};
+    chart.config = config;
+    chart._myDirEle = myDirEle;
+    chart.data = data;
     chart.svg;
     chart.focus;
+    chart.x;
+    chart.y;
+    chart.dimension;
+    chart.group;
+    chart.margins = config.margins ? config.margins : {top:0, bottom:0, left:0, right:0};
+    chart.width = chart.config.width - chart.margins.left - chart.margins.right;
+    chart.height = chart.config.height - chart.margins.top - chart.margins.bottom;
+    
 
-    var x,
-        y,
-        dimension,
-        group,
-        width,
-        height,
-        margins = {top:0, bottom:0, left:0, right:0};
-
-    chart.margin = function (myVar) {
+    chart.setMargins = function (myVar) {
         if (!myVar) { return chart.margin; }
         margins = myVar;
         width = margins.left - margins.right;
         height = margins.top - margins.bottom;
         if (!chart.focus) { chart.buildFocus(); }
-        return chart;
-    };
-
-    chart.dimension = function (myVar) {
-        if (!myVar) { return dimension; }
-        dimension = myVar;
-        return chart;
-    };
-
-    chart.group = function (myVar) {
-        if (!myVar) { return myVar; }
-        group = myVar;
         return chart;
     };
 
@@ -128,12 +115,13 @@ var _D3Chart = function () {
     };
 
     chart.buildFocus = function () {
-        chart.svg = div.append('svg')
-            .attr('width', width + margins.left + margins.right)
-            .attr('height', height + margins.top + margins.bottom);
+        chart.svg = d3.select(chart._myDirEle)
+            .append('svg')
+            .attr('width', chart.width + chart.margins.left + chart.margins.right)
+            .attr('height', chart.height + chart.margins.top + chart.margins.bottom);
 
         chart.focus = chart.svg.append('g')
-            .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');        
+            .attr('transform', 'translate(' + chart.margins.left + ',' + chart.margins.top + ')');        
 
         return chart.focus;
     };
@@ -141,20 +129,27 @@ var _D3Chart = function () {
     chart.buildAxisX = function () {
         var xAxis = d3.svg.axis()
             .scale(chart.x)
-            .orient("bottom")
+            .orient("bottom");
 
         chart.focus.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", "translate(0," + chart.height + ")")
             .call(xAxis);
     };
+    return chart;
 };
 
-var D3Histogram = function (widget) {
-    chart = _D3Chart();
-    var min = d3.min(chart.group.all(), function (d) { return d.key; }),
-        max = d3.max(chart.group.all(), function (d) { return d.key; }),
+var D3Histogram = function (config, data, myDirEle) {
+    var chart = new _D3Chart(config, data, myDirEle);
+    chart.dimension = chart.data[chart.config.series[0].ref];//[chart.config.series[0].ref];
+
+    var min = d3.min(chart.dimension.top(Infinity), function (d) { return d[chart.config.series[0].ref]; }),
+        max = d3.max(chart.dimension.top(Infinity), function (d) { return d[chart.config.series[0].ref]; }),
         step = (max - min) / 20;
+
+    chart.group = chart.dimension.group(function(d){
+        return Math.floor(d/step)*step;
+    });
 
     chart.x = d3.scale.linear()
         .domain([min, max + step])
@@ -169,13 +164,13 @@ var D3Histogram = function (widget) {
     });
 
     chart.buildDisplay = function () {
-        chart.bar = chart.focus.selectAll(".bar")
+        chart.bars = chart.focus.selectAll(".bar")
             .data(chart.group.all())
             .enter().append("g")
             .attr("class", "bar")
             .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
 
-        chart.bar.append("rect")
+        chart.bars.append("rect")
             .attr("x", 1)
             .attr("width", chart.x(min + step)-1)
             .attr("height", function(d) { return chart.height - chart.y(d.value); });

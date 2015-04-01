@@ -58,6 +58,13 @@ exports.create = function(req, res) {
 
 // Updates an existing widget in the DB.
 exports.update = function(req, res) {
+  console.log(req.body);
+  Widget.findByIdAndUpdate(req.body._id, req.body, function (err, widget) {
+    if (err) { return handleError(res, err); }
+    if(!widget) { return res.send(404); }
+    return res.json(200, widget);
+  });
+  /*
   if(req.body._id) { delete req.body._id; }
   Widget.findById(req.params.id, function (err, widget) {
     if (err) { return handleError(res, err); }
@@ -68,6 +75,7 @@ exports.update = function(req, res) {
       return res.json(200, widget);
     });
   });
+*/
 };
 
 // Deletes a widget from the DB.

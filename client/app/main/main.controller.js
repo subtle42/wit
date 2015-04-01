@@ -35,7 +35,7 @@ angular.module('meanApp')
 
     $scope.widgetSortOptions = {
       connectWith: 'widget-container',
-      placeholder: "ui-state-highlight"
+      handle: '.widgetheader'
     };
 
     $scope.pageLoad = function () {

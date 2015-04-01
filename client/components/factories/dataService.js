@@ -8,8 +8,9 @@ angular.module('mean.factories').factory('DataService', function ($http, $rootSc
 		$http.get('api/sources/data/' + sourceId)
 		.success(function (res) {
 			fac.list[sourceId] = {
-				main: crossfilter(res)
+				main: crossfilter(res),
 			};
+			fac.list[sourceId].all = fac.list[sourceId].main.groupAll();
 			$rootScope.$broadcast(sourceId + '_loaded');
 		}).error(function (err) {
 			$log.log(err);

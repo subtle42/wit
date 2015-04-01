@@ -1,4 +1,4 @@
 'use strict';
 
-angular.module('meanApp.charts', [
+angular.module('mean.charts', [
 ]);

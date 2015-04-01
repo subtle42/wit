@@ -1,6 +1,6 @@
 div.widget-main.panel.panel-primary(id="{{widget.name}}",
 	ng-class="{'expandWidget': widget.maximize}")
-	div.panel-heading.widget-header(ng-dblclick="maximize()")
+	div.panel-heading.widgetheader(ng-dblclick="maximize()")
 		h3.panel-title
 			button.btn.btn-primary.btn-xs(stop-event="dblclick",
 				ng-click="openConfigMenu()",
@@ -37,6 +37,7 @@ div.widget-main.panel.panel-primary(id="{{widget.name}}",
 			span.glyphicon.glyphicon-stats
 			span.glyphicon.glyphicon-plus-sign
 		span.pull-right
+			{{subset}} of {{total}}
 			button.btn.btn-xs.dropdown-toggle(type="button",
 				data-toggle="dropdown")
 				span.glyphicon.glyphicon-stats
@@ -51,7 +52,7 @@ div.widget-main.panel.panel-primary(id="{{widget.name}}",
 					'fa-lock': widget.locked,\
 					'fa-unlock': !widget.locked}")
 	div.panel-body.widget-content(ng-hide="widget.collapse",
-		ng-style="{'height': widget.height + 64}")
+		ng-style="{'height': widget.height + 64, padding: 0}")
 		center
 			ul(ui-sortable="sortOptions",
 				ng-model="widget.series",
@@ -64,7 +65,7 @@ div.widget-main.panel.panel-primary(id="{{widget.name}}",
 					button.btn.btn-default.btn-xs(style="display:inline",
 						ng-hide="widget.series.length >= seriesLimit || seriesMoving")
 
-		//-div(d3Chart)
+		div(d3Chart)
 
 		//-center
 			ul(ui-sortable="sortOptions",

@@ -10,6 +10,7 @@ angular.module('meanApp', [
   'meanApp.directives',
   'mean.factories',
   'mean.filters',
+  'mean.charts',
   'ui.sortable'
 ])
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
