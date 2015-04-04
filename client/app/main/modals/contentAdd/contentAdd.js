@@ -22,8 +22,7 @@ angular.module('meanApp')
 		console.log('heard call');
 		$scope.myCancel();
 	});
-	$scope.$on('uploadFinished', function (source) {
-		console.log(source);
+	$scope.$on('uploadFinished', function (myScope, source) {
 		$scope.addWidgetTab.active = true;
 		$scope.addDataSourceTab = false;
 	});

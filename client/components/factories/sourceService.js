@@ -23,7 +23,7 @@ angular.module('mean.factories').factory('SourceService', function ($http, $log,
 		}).progress(function (evt) {
 			console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
 		}).success(function (source) {
-			fac.list[source._id] = source
+			fac.list.push(source);
 			if (callback) { callback(source); }
 		}).error(function (err) {
 			$log.log(err);

@@ -83,12 +83,16 @@ angular.module('meanApp')
 			return;
 		}
 		var page = $rootScope.pages.selected;
-		$rootScope.widgets.add($scope.typeSelected.type, $scope.dsSelected, page);
+		$rootScope.widgets.add($scope.typeSelected.type, $scope.dsSelected, page, function (newWidget) {
+			if (!$rootScope.data.list[$scope.dsSelected._id]) {
+				$rootScope.data.get($scope.dsSelected._id);
+			}	
+		});
 		$rootScope.$broadcast('WidgetAdded');
 	};
 
 	$scope.$on('uploadFinished', function (myScope, source) {
-		$scope.dsSelected = source;
+		$scope.selectSource(source);
 		$scope.next();
 	});
 });

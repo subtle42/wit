@@ -26,7 +26,7 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 		});
 	};
 
-	fac.add = function (type, source, page) {
+	fac.add = function (type, source, page, callback) {
 		var myConfig = fac._getChartDefaults(type, source);
 
 		$http.post('api/widgets', {
@@ -37,6 +37,7 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 			groups: myConfig.groups
 		}).success(function (newWidget) {
 			fac.list.push(newWidget);
+			if (callback) { callback(newWidget); }
 		}).error(function (err) {
 			$log.log(err);
 		});
