@@ -114,6 +114,21 @@ var _D3Chart = function (config, data, myDirEle) {
         return chart;
     };
 
+    chart.brushHandles = function (d) {
+        var e = +(d == "e"),
+            x = e ? 1 : -1,
+            y = chart.height / 3;
+        return "M" + (.5 * x) + "," + y
+            + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
+            + "V" + (2 * y - 6)
+            + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y)
+            + "Z"
+            + "M" + (2.5 * x) + "," + (y + 8)
+            + "V" + (2 * y - 8)
+            + "M" + (4.5 * x) + "," + (y + 8)
+            + "V" + (2 * y - 8);
+    };
+
     chart.buildFocus = function () {
         chart.svg = d3.select(chart._myDirEle)
             .append('svg')
@@ -145,14 +160,18 @@ var D3Histogram = function (config, data, myDirEle) {
 
     var min = d3.min(chart.dimension.top(Infinity), function (d) { return d[chart.config.series[0].ref]; }),
         max = d3.max(chart.dimension.top(Infinity), function (d) { return d[chart.config.series[0].ref]; }),
-        step = (max - min) / 20;
+        stepCount = 20,
+        step = (max - min) / stepCount;
 
+    max = max + step;
+
+console.log(step);
     chart.group = chart.dimension.group(function(d){
         return Math.floor(d/step)*step;
     });
 
     chart.x = d3.scale.linear()
-        .domain([min, max + step])
+        .domain([min, max])
         .range([0, chart.width]);
 
     chart.y = d3.scale.linear()
@@ -163,18 +182,63 @@ var D3Histogram = function (config, data, myDirEle) {
         return Math.floor(d/step)*step;
     });
 
+    chart.brushChange = function () {
+        var tmp = chart.brush.extent()
+        console.log(tmp);
+        chart.dimension.filterRange(tmp);
+    };
+
+    chart.brushEnd = function () {
+        if (chart.brush.empty()) {
+            console.log('brush empty');
+            chart.dimension.filterAll();
+        }
+    };
+
+    chart.brush = d3.svg.brush()
+        .x(chart.x)
+        .on('brush', chart.brushChange)
+        .on('brushend', chart.brushEnd);
+
     chart.buildDisplay = function () {
         chart.bars = chart.focus.selectAll(".bar")
             .data(chart.group.all())
             .enter().append("g")
             .attr("class", "bar")
             .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
-
+        
         chart.bars.append("rect")
             .attr("x", 1)
             .attr("width", chart.x(min + step)-1)
             .attr("height", function(d) { return chart.height - chart.y(d.value); });
+        
+        var gBrush = chart.focus.append("g").attr("class", "brush").call(chart.brush);
+          gBrush.selectAll("rect").attr("height", chart.height);
+          gBrush.selectAll(".resize").append("path").attr("d", chart.brushHandles);
+/*
+        chart.bars = chart.focus.selectAll(".bar")
+              .data(["background", "foreground"])
+            .enter().append("path")
+              .attr("class", function (d) { return d + " bar"; })
+              .datum(chart.group.all());
+
+        chart.focus.selectAll(".bar")
+            .attr("d", chart.barPath)
+            .attr('width', chart.x(min + step)-1);
+  */      
     };
+
+    chart.barPath = function (groups) {
+        var path = [],
+            i = -1,
+            n = groups.length,
+            d;
+        while (++i < n) {
+          d = groups[i];
+          path.push("M", chart.x(d.key), ",", chart.height, "V", chart.y(d.value), "h" + (chart.x(min + step)-1) + "V", chart.height);
+        }
+        return path.join("");
+      };
 
     chart.buildBarNumbers = function () {
         var formatCount = d3.format(",.0f");
