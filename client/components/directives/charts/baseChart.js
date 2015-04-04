@@ -24,7 +24,7 @@ angular.module('mean.charts')
             // Fires on window resize
             $(window).resize(function () {
                 $scope.widget.width = element.width();
-                $scope.chart.resize();
+                $scope.chart.resize(element.width() - 50);
             });
 
             $scope.redraw = function () {
@@ -102,6 +102,10 @@ var _D3Chart = function (config, data, myDirEle) {
         return chart;
     };
 
+    chart.resize = function (width, height) {
+        console.error('chart resize is not defined'); 
+    };
+
     chart.filter = function(myVar) {
         if (myVar) {
             brush.extent(myVar);
@@ -136,20 +140,20 @@ var _D3Chart = function (config, data, myDirEle) {
             .attr('height', chart.height + chart.margins.top + chart.margins.bottom);
 
         chart.focus = chart.svg.append('g')
-            .attr('transform', 'translate(' + chart.margins.left + ',' + chart.margins.top + ')');        
+            .attr('transform', 'translate(' + chart.margins.left + ',' + chart.margins.top + ')');
 
         return chart.focus;
     };
 
     chart.buildAxisX = function () {
-        var xAxis = d3.svg.axis()
+        chart.xAxis = d3.svg.axis()
             .scale(chart.x)
             .orient("bottom");
 
         chart.focus.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + chart.height + ")")
-            .call(xAxis);
+            .call(chart.xAxis);
     };
     return chart;
 };
@@ -205,9 +209,9 @@ console.log(step);
             .data(chart.group.all())
             .enter().append("g")
             .attr("class", "bar")
-            .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
+            .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; })
         
-        chart.bars.append("rect")
+        chart.disp = chart.bars.append("rect")
             .attr("x", 1)
             .attr("width", chart.x(min + step)-1)
             .attr("height", function(d) { return chart.height - chart.y(d.value); });
@@ -242,12 +246,39 @@ console.log(step);
 
     chart.buildBarNumbers = function () {
         var formatCount = d3.format(",.0f");
-        chart.bars.append("text")
+        chart.text = chart.bars.append("text")
             .attr("dy", ".75em")
             .attr("y", 6)
             .attr("x", chart.x(min + step) / 2)
             .attr("text-anchor", "middle")
             .text(function(d) { return formatCount(d.value); });
+    };
+
+    chart.resize = function (_width, _height) {
+        var width = _width ? _width : chart.width;
+        var height = _height ? _height : chart.height;
+
+        chart.svg 
+            .attr('width', width + chart.margins.left + chart.margins.right)
+            .attr('height', height + chart.margins.top + chart.margins.bottom);
+
+        chart.x.range([0, width]);
+        chart.y.range([height, 0]);
+        
+        
+        d3.select('.x')
+            .attr("transform", "translate(0," + height + ")")
+            .call(chart.xAxis);
+        
+        chart.text.attr("x", chart.x(min + step) / 2);
+
+        chart.bars
+            .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
+
+        chart.disp
+            .attr("x", 1)
+            .attr("width", chart.x(min + step)-1)
+            .attr("height", function(d) { return height - chart.y(d.value); });
     };
 
     /*
