@@ -193,7 +193,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 		myModal.result.then(function (newWidget) {
 			$scope.widget = newWidget;
 			$rootScope.widgets.update(newWidget);
-			$scope.redraw();
+			$scope.buildChart();
 		}, function () {
 			$log.log('canceled');
 		});

@@ -7,7 +7,7 @@ angular.module('mean.charts')
         link: function postLink($scope, element, attrs) {
             if ($rootScope.data.list[$scope.widget.sourceId]) {
                 $timeout(function () {
-                    $scope.draw(element);
+                    $scope.buildChart();
                 }, 50);
             } else {
                 console.log('looking for: ' + $scope.widget.sourceId + '_loaded');
@@ -16,44 +16,21 @@ angular.module('mean.charts')
                     if ($scope.chart) {
                         return;
                     }
-                    $scope.draw(element);
+                    $scope.buildChart();
                 });
             }
-            
 
             // Fires on window resize
             $(window).resize(function () {
-                $scope.chart.resize(element.width() - 50);
+                $scope.chart.resize(element.width());
             });
 
-            $scope.redraw = function () {
+            $scope.buildChart = function () {
                 if ($scope.chart) {
                     $scope.chart.svg.remove();
                     delete $scope.chart;
                 }
-                $scope.draw(element);
-                return;
 
-                $scope.widget.width = element.width();
-                
-                angular.forEach($scope.widget.series, function (serie) {
-                    if (!$scope.data[serie.ref]) {
-                        var colName = parseInt(serie.ref);
-                        $scope.data[colName] = $scope.data.main.dimension(function (d) {
-                            return d[colName];
-                        });
-                    }
-                });
-                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
-                $log.log($scope.chart);
-
-                $scope.chart.buildFocus();
-                $scope.chart.buildAxisX();
-                $scope.chart.buildDisplay();
-                $scope.chart.buildBarNumbers();
-            };
-
-            $scope.draw = function (element) {
                 $scope.widget.width = element.width();
                 $scope.data = $rootScope.data.list[$scope.source._id];
 
@@ -67,10 +44,6 @@ angular.module('mean.charts')
                 });
                 $scope.subset = $rootScope.data.list[$scope.source._id].all.value();
                 $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
-                $scope.chart.buildFocus();
-                $scope.chart.buildAxisX();
-                $scope.chart.buildDisplay();
-                $scope.chart.buildBarNumbers();
             };
         }
     };
@@ -168,9 +141,11 @@ var _D3Chart = function (config, data, myDirEle, filterList) {
     return chart;
 };
 
+//TODO: should probably make this a service
 var D3Histogram = function (config, data, myDirEle, filterList) {
     var chart = new _D3Chart(config, data, myDirEle, filterList);
     var formatCount = d3.format(",.0f");
+    // TODO: this line should be abstacted
     chart.dimension = chart.data[chart.config.series[0].ref];
 
 
@@ -198,6 +173,13 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
     });
 
     chart.buildBrush();
+
+    chart.init = function () {
+        chart.buildFocus();
+        chart.buildDisplay();
+        chart.buildBarNumbers();
+        chart.buildAxisX();
+    };
 
     chart.buildDisplay = function () {
         chart.barColumns = chart.focus.selectAll(".bar")
@@ -241,8 +223,14 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
 
     // change scaling of chart no data change
     chart.resize = function (_width, _height) {
-        var width = _width ? _width : chart.width;
-        var height = _height ? _height : chart.height;
+        var width = chart.width;
+        var height = chart.height;
+        if (_width) {
+            width = _width - chart.margins.left - chart.margins.right;
+        }
+        if (_height) {
+            height = _height - chart.margins.top - chart.margins.bottom;
+        }
 
         // resize widget content area
         chart.svg 
@@ -275,6 +263,8 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
         // removes brush from view due to brush not scaling during move
         chart.brush.clear();
     };
+
+    chart.init();
 
     return chart;
 };
