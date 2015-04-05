@@ -23,7 +23,6 @@ angular.module('mean.charts')
 
             // Fires on window resize
             $(window).resize(function () {
-                $scope.widget.width = element.width();
                 $scope.chart.resize(element.width() - 50);
             });
 
@@ -94,29 +93,12 @@ var _D3Chart = function (config, data, myDirEle, filterList) {
     chart.height = chart.config.height - chart.margins.top - chart.margins.bottom;
     
 
-    chart.setMargins = function (myVar) {
-        if (!myVar) { return chart.margin; }
-        margins = myVar;
-        width = margins.left - margins.right;
-        height = margins.top - margins.bottom;
-        if (!chart.focus) { chart.buildFocus(); }
-        return chart;
-    };
-
     chart.resize = function (width, height) {
         console.error('chart resize is not defined'); 
     };
 
-    chart.filter = function(myVar) {
-        if (myVar) {
-            brush.extent(myVar);
-            dimension.filterRange(myVar);
-        } else {
-            brush.clear();
-            dimension.filterAll();
-        }
-        brushDirty = true;
-        return chart;
+    chart.draw = function () {
+        console.error('chart draw is not defined');
     };
 
     chart.brushHandles = function (d) {
@@ -142,8 +124,6 @@ var _D3Chart = function (config, data, myDirEle, filterList) {
 
         chart.focus = chart.svg.append('g')
             .attr('transform', 'translate(' + chart.margins.left + ',' + chart.margins.top + ')');
-
-        return chart.focus;
     };
 
     chart.buildAxisX = function () {
@@ -156,12 +136,43 @@ var _D3Chart = function (config, data, myDirEle, filterList) {
             .attr("transform", "translate(0," + chart.height + ")")
             .call(chart.xAxis);
     };
+
+    chart.buildBrush = function () {
+        chart.brush = d3.svg.brush()
+            .x(chart.x)
+            .on('brush', chart._brushChange)
+            .on('brushend', chart._brushEnd);
+    };
+
+    chart._brushChange = function () {
+        // getting exact value from brush
+        chart.dimension.filterRange(chart.brush.extent());
+        chart._runFilter();
+    };
+
+    chart._brushEnd = function () {
+        if (chart.brush.empty()) {
+            // clearing filter
+            chart.dimension.filterAll();
+            chart._runFilter();
+        }
+    };
+
+    chart._runFilter = function () {
+        // running update on all charts with the same source
+        angular.forEach(chart.filterList, function (item) {
+            item.chart.draw();
+        });
+    };
+
     return chart;
 };
 
 var D3Histogram = function (config, data, myDirEle, filterList) {
     var chart = new _D3Chart(config, data, myDirEle, filterList);
-    chart.dimension = chart.data[chart.config.series[0].ref];//[chart.config.series[0].ref];
+    var formatCount = d3.format(",.0f");
+    chart.dimension = chart.data[chart.config.series[0].ref];
+
 
     var min = d3.min(chart.dimension.top(Infinity), function (d) { return d[chart.config.series[0].ref]; }),
         max = d3.max(chart.dimension.top(Infinity), function (d) { return d[chart.config.series[0].ref]; }),
@@ -186,73 +197,27 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
         return Math.floor(d/step)*step;
     });
 
-    chart.brushChange = function () {
-        var tmp = chart.brush.extent()
-        console.log(tmp);
-        chart.dimension.filterRange(tmp);
-        angular.forEach(chart.filterList, function (item) {
-            item.chart.resize();
-        });
-    };
-
-    chart.brushEnd = function () {
-        if (chart.brush.empty()) {
-            console.log('brush empty');
-            chart.dimension.filterAll();
-            angular.forEach(chart.filterList, function (item) {
-                item.chart.resize();
-            });
-        }
-    };
-
-    chart.brush = d3.svg.brush()
-        .x(chart.x)
-        .on('brush', chart.brushChange)
-        .on('brushend', chart.brushEnd);
+    chart.buildBrush();
 
     chart.buildDisplay = function () {
-        chart.bars = chart.focus.selectAll(".bar")
+        chart.barColumns = chart.focus.selectAll(".bar")
             .data(chart.group.all())
             .enter().append("g")
             .attr("class", "bar")
             .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; })
         
-        chart.disp = chart.bars.append("rect")
+        chart.bars = chart.barColumns.append("rect")
             .attr("x", 1)
             .attr("width", chart.x(min + step)-1)
             .attr("height", function(d) { return chart.height - chart.y(d.value); });
         
         chart.gBrush = chart.focus.append("g").attr("class", "brush").call(chart.brush);
-          chart.gBrush.selectAll("rect").attr("height", chart.height);
-          chart.gBrush.selectAll(".resize").append("path").attr("d", chart.brushHandles);
-/*
-        chart.bars = chart.focus.selectAll(".bar")
-              .data(["background", "foreground"])
-            .enter().append("path")
-              .attr("class", function (d) { return d + " bar"; })
-              .datum(chart.group.all());
-
-        chart.focus.selectAll(".bar")
-            .attr("d", chart.barPath)
-            .attr('width', chart.x(min + step)-1);
-  */      
+        chart.gBrush.selectAll("rect").attr("height", chart.height);
+        chart.gBrush.selectAll(".resize").append("path").attr("d", chart.brushHandles);
     };
 
-    chart.barPath = function (groups) {
-        var path = [],
-            i = -1,
-            n = groups.length,
-            d;
-        while (++i < n) {
-          d = groups[i];
-          path.push("M", chart.x(d.key), ",", chart.height, "V", chart.y(d.value), "h" + (chart.x(min + step)-1) + "V", chart.height);
-        }
-        return path.join("");
-      };
-
     chart.buildBarNumbers = function () {
-        var formatCount = d3.format(",.0f");
-        chart.text = chart.bars.append("text")
+        chart.text = chart.barColumns.append("text")
             .attr("dy", ".75em")
             .attr("y", 6)
             .attr("x", chart.x(min + step) / 2)
@@ -260,6 +225,21 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
             .text(function(d) { return formatCount(d.value); });
     };
 
+    // no change in scaling on update data display
+    chart.draw = function () {
+        chart.y.domain([0, d3.max(chart.group.top(1), function (d) { return d.value; })]);
+        // moves column text
+        chart.text
+            .text(function (d) { return formatCount(d.value); });
+        // moves the column up and down
+        chart.barColumns
+            .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
+        // controls the length of the column
+        chart.bars
+            .attr("height", function(d) { return chart.height - chart.y(d.value); });
+    };
+
+    // change scaling of chart no data change
     chart.resize = function (_width, _height) {
         var width = _width ? _width : chart.width;
         var height = _height ? _height : chart.height;
@@ -271,26 +251,22 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
 
         // updating d3 scaling
         chart.x.range([0, width]);
-        chart.y.range([height, 0])
-            .domain([0,d3.max(chart.group.all(), function (d) { return d.value; })]);
+        chart.y.range([height, 0]);
         
-        // resize chart area, includes padding
+        // resize the x axis
         chart.focus.select('.x')
             .attr("transform", "translate(0," + height + ")")
             .call(chart.xAxis);
 
-        var formatCount = d3.format(",.0f");
-        // moves column text
-        chart.text.attr("x", chart.x(min + step) / 2)
-            .text(function (d) { return formatCount(d.value); });
+        // adjusts count text
+        chart.text.attr("x", chart.x(min + step) / 2);
 
         // moves columns left and right
-        chart.bars
+        chart.barColumns
             .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
 
         // updates bar width and height
-        chart.disp
-            .attr("x", 1)
+        chart.bars
             .attr("width", chart.x(min + step)-1)
             .attr("height", function(d) { return height - chart.y(d.value); });
 
@@ -300,39 +276,5 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
         chart.brush.clear();
     };
 
-    /*
-    chart.svg = div.append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom);
-
-    chart.focus = chart.svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-    */
-
-    /*
-    chart.focus.append('clipPath')
-        .attr('clip_' + widget._id)
-        .append('rect')
-        .attr('width', width)
-        .attr('height', height);
-    
-    chart.focus.selectAll('.bar')
-        .data(['background', 'foreground'])
-        .enter().append('path')
-        .attr('class', function (d) { return d + ' bar'; })
-        .datum(group.all());
-        
-
-    // creating x axis
-    chart.focus.append('g')
-        .attr('class', 'axis')
-        .attr('transform', 'translate(0,' + height + ')')
-        .call(axisx);
-
-    // creating brush
-    var gBrush = chart.focus.append('g')
-        .attr('class', 'brush')
-        .call(brush)
-    */
     return chart;
 };
