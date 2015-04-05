@@ -45,7 +45,7 @@ angular.module('mean.charts')
                         });
                     }
                 });
-                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0]);
+                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
                 $log.log($scope.chart);
 
                 $scope.chart.buildFocus();
@@ -67,7 +67,7 @@ angular.module('mean.charts')
                     }
                 });
                 $scope.subset = $rootScope.data.list[$scope.source._id].all.value();
-                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0]);
+                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
                 $scope.chart.buildFocus();
                 $scope.chart.buildAxisX();
                 $scope.chart.buildDisplay();
@@ -77,8 +77,9 @@ angular.module('mean.charts')
     };
 });
 
-var _D3Chart = function (config, data, myDirEle) {
+var _D3Chart = function (config, data, myDirEle, filterList) {
     var chart = {};
+    chart.filterList = filterList;
     chart.config = config;
     chart._myDirEle = myDirEle;
     chart.data = data;
@@ -158,8 +159,8 @@ var _D3Chart = function (config, data, myDirEle) {
     return chart;
 };
 
-var D3Histogram = function (config, data, myDirEle) {
-    var chart = new _D3Chart(config, data, myDirEle);
+var D3Histogram = function (config, data, myDirEle, filterList) {
+    var chart = new _D3Chart(config, data, myDirEle, filterList);
     chart.dimension = chart.data[chart.config.series[0].ref];//[chart.config.series[0].ref];
 
     var min = d3.min(chart.dimension.top(Infinity), function (d) { return d[chart.config.series[0].ref]; }),
@@ -169,7 +170,6 @@ var D3Histogram = function (config, data, myDirEle) {
 
     max = max + step;
 
-console.log(step);
     chart.group = chart.dimension.group(function(d){
         return Math.floor(d/step)*step;
     });
@@ -190,12 +190,18 @@ console.log(step);
         var tmp = chart.brush.extent()
         console.log(tmp);
         chart.dimension.filterRange(tmp);
+        angular.forEach(chart.filterList, function (item) {
+            item.chart.resize();
+        });
     };
 
     chart.brushEnd = function () {
         if (chart.brush.empty()) {
             console.log('brush empty');
             chart.dimension.filterAll();
+            angular.forEach(chart.filterList, function (item) {
+                item.chart.resize();
+            });
         }
     };
 
@@ -216,9 +222,9 @@ console.log(step);
             .attr("width", chart.x(min + step)-1)
             .attr("height", function(d) { return chart.height - chart.y(d.value); });
         
-        var gBrush = chart.focus.append("g").attr("class", "brush").call(chart.brush);
-          gBrush.selectAll("rect").attr("height", chart.height);
-          gBrush.selectAll(".resize").append("path").attr("d", chart.brushHandles);
+        chart.gBrush = chart.focus.append("g").attr("class", "brush").call(chart.brush);
+          chart.gBrush.selectAll("rect").attr("height", chart.height);
+          chart.gBrush.selectAll(".resize").append("path").attr("d", chart.brushHandles);
 /*
         chart.bars = chart.focus.selectAll(".bar")
               .data(["background", "foreground"])
@@ -258,27 +264,40 @@ console.log(step);
         var width = _width ? _width : chart.width;
         var height = _height ? _height : chart.height;
 
+        // resize widget content area
         chart.svg 
             .attr('width', width + chart.margins.left + chart.margins.right)
             .attr('height', height + chart.margins.top + chart.margins.bottom);
 
+        // updating d3 scaling
         chart.x.range([0, width]);
-        chart.y.range([height, 0]);
+        chart.y.range([height, 0])
+            .domain([0,d3.max(chart.group.all(), function (d) { return d.value; })]);
         
-        
-        d3.select('.x')
+        // resize chart area, includes padding
+        chart.focus.select('.x')
             .attr("transform", "translate(0," + height + ")")
             .call(chart.xAxis);
-        
-        chart.text.attr("x", chart.x(min + step) / 2);
 
+        var formatCount = d3.format(",.0f");
+        // moves column text
+        chart.text.attr("x", chart.x(min + step) / 2)
+            .text(function (d) { return formatCount(d.value); });
+
+        // moves columns left and right
         chart.bars
             .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
 
+        // updates bar width and height
         chart.disp
             .attr("x", 1)
             .attr("width", chart.x(min + step)-1)
             .attr("height", function(d) { return height - chart.y(d.value); });
+
+        // updates brush area to be inline with focus
+        chart.gBrush.call(chart.brush);
+        // removes brush from view due to brush not scaling during move
+        chart.brush.clear();
     };
 
     /*

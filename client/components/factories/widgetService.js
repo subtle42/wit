@@ -3,6 +3,7 @@
 angular.module('mean.factories').factory('WidgetService', function ($log, $http, $rootScope) {
 	var fac = {};
 	fac.list = [];
+	fac.filterList = [];
 
 	fac.getByPage = function (pageId, callback) {
 		$http.get('api/widgets/bypage/' + pageId)

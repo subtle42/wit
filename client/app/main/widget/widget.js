@@ -34,6 +34,15 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 		$scope.total = $scope.source.count;
 		$scope.seriesLimit($scope.widget.type);
 		$scope.groupsLimit($scope.widget.type);
+		$scope.addToFilterList();
+	};
+
+	$scope.addToFilterList = function () {
+		if (!$rootScope.widgets.filterList[$scope.source._id]) {
+			$rootScope.widgets.filterList[$scope.source._id] = [$scope];
+		} else if ($rootScope.widgets.filterList[$scope.source._id].indexOf($scope) === -1) {
+			$rootScope.widgets.filterList[$scope.source._id].push($scope);
+		}
 	};
 
 	$scope.seriesLimit = function (type) {
