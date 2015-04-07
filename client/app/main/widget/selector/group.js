@@ -23,7 +23,7 @@ angular.module('meanApp')
 				$scope.updateConfig = function () {
 					$scope.config.ref = $scope.columnSelected.ref;
 					$rootScope.widgets.update($scope.$parent.widget);
-					$scope.$parent.redraw();
+					$scope.$parent.buildChart();
 				};
 
 				$scope.init = function () {

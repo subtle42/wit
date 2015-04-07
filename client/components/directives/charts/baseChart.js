@@ -10,9 +10,7 @@ angular.module('mean.charts')
                     $scope.buildChart();
                 }, 50);
             } else {
-                console.log('looking for: ' + $scope.widget.sourceId + '_loaded');
                 $scope.$on($scope.widget.sourceId + '_loaded', function () {
-                    console.log('fired!');
                     if ($scope.chart) {
                         return;
                     }
@@ -172,6 +170,25 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
         return Math.floor(d/step)*step;
     });
 
+    chart._brushChange = function () {
+        var e = chart.brush.extent();
+        chart.bars.classed('background', function (d) {
+            return e[0] > d.key || d.key > e[1];
+        });
+        // getting exact value from brush
+        chart.dimension.filterRange(e);
+        chart._runFilter();
+    };
+
+    chart._brushEnd = function () {
+        if (chart.brush.empty()) {
+            chart.bars.classed('background', false);
+            // clearing filter
+            chart.dimension.filterAll();
+            chart._runFilter();
+        }
+    };
+
     chart.buildBrush();
 
     chart.init = function () {
@@ -255,7 +272,7 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
 
         // updates bar width and height
         chart.bars
-            .attr("width", chart.x(min + step)-1)
+            .attr("width", chart.x(min + step) - 1)
             .attr("height", function(d) { return height - chart.y(d.value); });
 
         // updates brush area to be inline with focus

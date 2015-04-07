@@ -35,7 +35,7 @@ angular.module('meanApp')
 					$scope.config.formula = $scope.formulaSelected.value;
 					$scope.config.ref = $scope.columnSelected.ref;
 					$rootScope.widgets.update($scope.$parent.widget);
-					$scope.$parent.redraw();
+					$scope.$parent.buildChart();
 				};
 
 				$scope.init = function () {

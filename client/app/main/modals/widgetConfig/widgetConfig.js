@@ -16,6 +16,6 @@ angular.module('meanApp')
 	};
 
 	$scope.updateDisplay = function () {
-		$scope.$$childTail.redraw();
+		$scope.$$childTail.buildChart();
 	};
 });
