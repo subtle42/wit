@@ -20,7 +20,6 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 	$scope.groupsLimit = 0;
 	$scope.total = 0;
 	$scope.subset = 0;
-	$log.log($scope.widget.type);
 	$scope.sortOptions = {
 		axis: 'x'
 	};
@@ -32,8 +31,8 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 			}
 		});
 		$scope.total = $scope.source.count;
-		$scope.seriesLimit($scope.widget.type);
-		$scope.groupsLimit($scope.widget.type);
+		$scope.getSeriesLimit($scope.widget.type);
+		$scope.getGroupsLimit($scope.widget.type);
 		$scope.addToFilterList();
 	};
 
@@ -45,7 +44,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 		}
 	};
 
-	$scope.seriesLimit = function (type) {
+	$scope.getSeriesLimit = function (type) {
 		var limit1 = ['histogram', 'pie'];
 		var limit2 = [];
 		if (limit1.indexOf(type) !== -1) {
@@ -57,7 +56,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 		}
 	};
 
-	$scope.groupsLimit = function (type) {
+	$scope.getGroupsLimit = function (type) {
 		var limit0 = ['histogram'];
 		var limit1 = ['pie'];
 		if (limit0.indexOf(type) !== -1) {
@@ -186,6 +185,9 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 			resolve: {
 				widget: function () {
 					return $scope.widget;
+				},
+				source: function () {
+					return $scope.source;
 				}
 			}
 		});
@@ -193,6 +195,8 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 		myModal.result.then(function (newWidget) {
 			$scope.widget = newWidget;
 			$rootScope.widgets.update(newWidget);
+			$scope.getSeriesLimit($scope.widget.type);
+			$scope.getGroupsLimit($scope.widget.type);
 			$scope.buildChart();
 		}, function () {
 			$log.log('canceled');

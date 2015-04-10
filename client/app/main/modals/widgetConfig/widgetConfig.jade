@@ -41,8 +41,14 @@ div.modal-body
 						td
 		tab(heading="Options")
 		tab(heading="Type")
-			button.btn()
-				| Histogram
+			button.chartTypeButton(ng-repeat="myImg in chartImages",
+				ng-class="{'btn': true, 'btn-disabled': !validChart(myImg),\
+					'btn-info' : validChart(myImg),\
+					'btn-warning': myImg.active == true}",
+				ng-disabled = '!validChart(myImg)'
+				ng-click="selectChartType(myImg)")
+				div(style="height:90px; width:90px")
+				| {{myImg.type}}
 //-	div(d3chart,
 		style="height:200px; width:200px")
 div.modal-footer

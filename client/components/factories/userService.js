@@ -8,7 +8,6 @@ angular.module('mean.factories').factory('UserService', function ($http, $log) {
 		$http.get('/api/collections/allbyuser')
 		.success(function (res) {
 			fac.profile = res[0];
-			$log.log(fac.profile);
 			if(callback) { callback(); }
 		}).error(function (err) {
 			$log.log(err);

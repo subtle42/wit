@@ -5,8 +5,6 @@ angular.module('mean.charts')
     return {
         restrict: 'A',
         link: function postLink($scope, element, attrs) {
-            $log.log($scope.widget);
-            console.log(element);
             if ($rootScope.data.list[$scope.widget.sourceId]) {
                 $timeout(function () {
                     $scope.buildChart();
@@ -364,6 +362,12 @@ var D3Pie = function (config, data, myDirEle, filterList) {
     };
 
     chart.draw = function () {
+        // errors are thrown in d3 if there is no data set, settting chart to hidden
+        if (chart.data.all.reduceCount().value() === 0) {
+            chart.path.style('visibility', 'hidden');
+            return;
+        }
+        chart.path.style('visibility', 'visible');
         chart.path.data(chart.pie);
         chart.path.attr('d', chart.arc);
     };
