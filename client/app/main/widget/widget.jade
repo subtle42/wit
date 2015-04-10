@@ -67,7 +67,8 @@ div.widget-main.panel.panel-primary(id="{{widget.name}}",
 
 		div(d3Chart)
 
-		//-center
+
+		center(ng-show="groupsLimit > 0")
 			ul(ui-sortable="sortOptions",
 				ng-model="widget.groups",
 				style="list-style-type:none")
@@ -76,5 +77,5 @@ div.widget-main.panel.panel-primary(id="{{widget.name}}",
 					group(index="$index",
 						selector="myGroup",
 						source="source")
-				button.btn.btn-default.btn-xs(ng-hide="widget.groups.length > 1")
+				button.btn.btn-default.btn-xs(ng-hide="widget.groups.length >= groupsLimit")
 					span.glyphicon.glyphicon-plus(ng-click="addGroup()")

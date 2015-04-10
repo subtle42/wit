@@ -41,3 +41,7 @@
 .background {
   fill: #ccc !important;
 }
+
+.chartTypeButton {
+    margin: 20px;
+}

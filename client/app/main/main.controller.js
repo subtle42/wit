@@ -14,6 +14,7 @@ angular.module('meanApp')
     $scope.tabSortOptions = {
       axis: 'x',
       start: function (e, ui) {
+        ui.helper.width($(this).width());
         $timeout(function () {
           $scope.sortingPages = true;
         }, 0);
@@ -35,7 +36,11 @@ angular.module('meanApp')
 
     $scope.widgetSortOptions = {
       connectWith: 'widget-container',
-      handle: '.widgetheader'
+      handle: '.widgetheader',
+      items: 'widget',
+      start: function (e, ui) {
+        ui.helper.width('100%');
+      }
     };
 
     $scope.pageLoad = function () {

@@ -117,14 +117,10 @@ exports.create = function(req, res) {
 
 // Updates an existing Source in the DB.
 exports.update = function(req, res) {
-  Source.findById(req.body._id, function (err, source) {
+  Source.findByIdAndUpdate(req.body._id, req.body, function (err, source) {
     if (err) { return handleError(res, err); }
     if(!source) { return res.send(404); }
-    var updated = _.merge(source, req.body);
-    updated.save(function (err) {
-      if (err) { return handleError(res, err); }
-      return res.json(200, source);
-    });
+    return res.json(source);
   });
 };
 

@@ -5,6 +5,8 @@ angular.module('mean.charts')
     return {
         restrict: 'A',
         link: function postLink($scope, element, attrs) {
+            $log.log($scope.widget);
+            console.log(element);
             if ($rootScope.data.list[$scope.widget.sourceId]) {
                 $timeout(function () {
                     $scope.buildChart();
@@ -32,16 +34,31 @@ angular.module('mean.charts')
                 $scope.widget.width = element.width();
                 $scope.data = $rootScope.data.list[$scope.source._id];
 
-                angular.forEach($scope.widget.series, function (serie) {
-                    if (!$scope.data[serie.ref]) {
-                        var colName = parseInt(serie.ref);
-                        $scope.data[colName] = $scope.data.main.dimension(function (d) {
-                            return d[colName];
-                        });
-                    }
-                });
+                
                 $scope.subset = $rootScope.data.list[$scope.source._id].all.value();
-                $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
+                if ($scope.widget.type === 'pie') {
+                    angular.forEach($scope.widget.groups, function (group) {
+                        if (!$scope.data[group.ref]) {
+                            var colName = parseInt(group.ref);
+                            $scope.data[colName] = $scope.data.main.dimension(function (d) {
+                                return d[colName];
+                            });
+                        }
+                    });
+                    $scope.chart = new D3Pie($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
+                } else if ($scope.widget.type === 'histogram') {
+                    angular.forEach($scope.widget.series, function (serie) {
+                        if (!$scope.data[serie.ref]) {
+                            var colName = parseInt(serie.ref);
+                            $scope.data[colName] = $scope.data.main.dimension(function (d) {
+                                return d[colName];
+                            });
+                        }
+                    });
+
+                    $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
+                }
+                
             };
         }
     };
@@ -268,12 +285,12 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
 
         // moves columns left and right
         chart.barColumns
-            .attr("transform", function(d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
+            .attr("transform", function (d) { return "translate(" + chart.x(d.key) + "," + chart.y(d.value) + ")"; });
 
         // updates bar width and height
         chart.bars
             .attr("width", chart.x(min + step) - 1)
-            .attr("height", function(d) { return height - chart.y(d.value); });
+            .attr("height", function (d) { return height - chart.y(d.value); });
 
         // updates brush area to be inline with focus
         chart.gBrush.call(chart.brush);
@@ -283,5 +300,97 @@ var D3Histogram = function (config, data, myDirEle, filterList) {
 
     chart.init();
 
+    return chart;
+};
+
+var D3Pie = function (config, data, myDirEle, filterList) {
+    var chart = new _D3Chart(config, data, myDirEle, filterList);
+
+    chart.dimension = chart.data[chart.config.groups[0].ref];
+    chart.group = chart.dimension.group().reduceSum(function (d) {
+        return d[chart.config.series[0].ref];
+    });
+
+    chart.radius = Math.min(chart.width, chart.height) / 2;
+    chart.color = d3.scale.category20().domain(chart.group.all().map(function (d) {
+        return d.key;
+    }));
+
+    
+
+    chart.init = function () {
+        chart.buildFocus();
+        chart.buildDisplay();
+    };
+
+    chart.buildFocus = function () {
+        chart.svg = d3.select(chart._myDirEle)
+            .append('svg')
+            .attr('width', chart.width + chart.margins.left + chart.margins.right)
+            .attr('height', chart.height + chart.margins.top + chart.margins.bottom)
+            .on('click', function () {
+                chart.dimension.filterAll();
+                chart._runFilter();
+            });
+
+        chart.focus = chart.svg.append('g')
+            .attr('transform', 'translate(' + chart.width/2 + ',' + chart.height/2 + ')');
+    };
+
+    chart.buildDisplay = function () {
+        chart.arc = d3.svg.arc()
+            .outerRadius(chart.radius)
+            .innerRadius(0);
+
+        chart.pie = d3.layout.pie()
+            .sort(null)
+            .value(function (d) {
+                return d.value;
+            });
+
+        chart.path = chart.focus.datum(chart.group.all())
+            .selectAll('path')
+            .data(chart.pie).enter()
+            .append('path')
+            .attr('fill', function (d) {
+                return chart.color(d.data.key);
+            })
+            .attr('d', chart.arc)
+            .on('click', function (d) {
+                d3.event.stopPropagation();
+                chart.dimension.filter(d.data.key);
+                chart._runFilter();
+            });
+    };
+
+    chart.draw = function () {
+        chart.path.data(chart.pie);
+        chart.path.attr('d', chart.arc);
+    };
+
+    chart.resize = function (_width, _height) {
+        var width = chart.width;
+        var height = chart.height;
+        if (_width) {
+            width = _width - chart.margins.left - chart.margins.right;
+        }
+        if (_height) {
+            height = _height - chart.margins.top - chart.margins.bottom;
+        }
+
+        // resize widget content area
+        chart.svg 
+            .attr('width', width + chart.margins.left + chart.margins.right)
+            .attr('height', height + chart.margins.top + chart.margins.bottom);
+
+        chart.radius = Math.min(width, height) / 2;
+
+        chart.focus
+            .attr('transform', 'translate(' + width/2 + ',' + height/2 + ')');
+        chart.arc.outerRadius(chart.radius);
+        //chart.slice.attr('d',chart.arc);
+    };
+
+    chart.init();
     return chart;
 };

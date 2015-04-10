@@ -7,7 +7,7 @@ angular.module('meanApp')
 				source: '=source',
 				index: '=index'
 			},
-			templateUrl: 'main/widget/selectors/group.html',
+			templateUrl: 'app/main/widget/selector/group.html',
 			controller: function ($scope, $rootScope, $log, $timeout) {
 				$scope.columnSelected = {};
 

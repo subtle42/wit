@@ -1,6 +1,6 @@
 select(ng-model="columnSelected",
 	ng-change="updateConfig()",
-	ng-options="col.name for col in source.columns | columns.type 'group' track by col.ref")
+	ng-options="col.name for col in source.columns | columnType: 'group' track by col.ref")
 button.close.btn-xs(type="button",
 	ng-click="remove(index)",
 	ng-hide="count() == 1")

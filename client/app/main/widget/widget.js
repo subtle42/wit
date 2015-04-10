@@ -20,7 +20,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 	$scope.groupsLimit = 0;
 	$scope.total = 0;
 	$scope.subset = 0;
-
+	$log.log($scope.widget.type);
 	$scope.sortOptions = {
 		axis: 'x'
 	};
@@ -46,7 +46,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 	};
 
 	$scope.seriesLimit = function (type) {
-		var limit1 = ['histogram'];
+		var limit1 = ['histogram', 'pie'];
 		var limit2 = [];
 		if (limit1.indexOf(type) !== -1) {
 			$scope.seriesLimit = 1;

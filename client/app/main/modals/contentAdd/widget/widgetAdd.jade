@@ -1,12 +1,13 @@
 div(ng-hide="pages.page1")
 	div.well
 		h3 Select a Chart Type
-		button(ng-repeat="myImg in chartImages",
+		button.chartTypeButton(ng-repeat="myImg in chartImages",
 			ng-class="{'btn': true, 'btn-disabled': !validChart(myImg),\
 				'btn-info' : validChart(myImg),\
 				'btn-warning': myImg.active == true}",
 			ng-disabled = '!validChart(myImg)'
 			ng-click="selectChartType(myImg)")
+			div(style="height:90px; width:90px")
 			| {{myImg.type}}
 div(ng-hide="pages.page2")
 	h3.center-block

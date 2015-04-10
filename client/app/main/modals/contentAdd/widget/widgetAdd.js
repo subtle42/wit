@@ -23,6 +23,46 @@ angular.module('meanApp')
 		type: 'histogram',
 		dimension: 1,
 		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
+	}, {
+		src: 'images/histogram.png',
+		type: 'histogram',
+		dimension: 1,
+		group: 0
 	}];
 
 	$scope.pages = {
@@ -40,6 +80,8 @@ angular.module('meanApp')
 	};
 
 	$scope.back = function () {
+		if ($scope.typeSelected) { $scope.typeSelected.active = false; }
+		$scope.typeSelected = undefined;
 		$scope.pages.page2 = false;
 		$scope.pages.page1 = true;
 	};
