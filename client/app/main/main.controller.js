@@ -130,7 +130,9 @@ angular.module('meanApp')
         angular.forEach($rootScope.pages.list, function (page) {
           page.active = false;
         });
-        $rootScope.pages.add(newPageTitle);
+        $rootScope.pages.add(newPageTitle, function () {
+          $rootScope.widgets.list = [];
+        });
       }, function () {
         $log.log('add page modal was canceled');
       });
