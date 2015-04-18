@@ -53,6 +53,18 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 		});
 	};
 
+	fac.getSourceList = function () {
+		var sourceList = [];
+
+		angular.forEach(fac.list, function (widget) {
+			if (sourceList.indexOf(widget.sourceId) === -1) {
+				sourceList.push(widget.sourceId);
+			}
+		});
+
+		return sourceList;
+	};
+
 	fac._getChartDefaults = function (type, source) {
 		var series = [];
 		var groups = [];

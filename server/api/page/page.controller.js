@@ -14,19 +14,26 @@ var Page = require('./page.model');
 var Collect = require('../collection/collection.model');
 
 exports.getByCollection = function (req, res) {
-  Page.find({collectionId: req.params.id}, function (err, pages) {
-    if(err) { return handleError(res, err); }
-    if(pages.length === 0) {
-      var newPage = new Page({
-        collectionId: req.params.id
-      });
-      Page.create(newPage, function (err, page) {
-        if(err) { return handleError(res, err); }
-        return res.json([page]);
-      });
-    } else {
-      return res.json(pages);
-    }
+  // Get collection
+  Collect.findById(req.params.id, function (err, collect) {
+    if (err || !collect) { return handleError(res, err); }
+    if (collect.pageList.length === 0) { return res.json([]); }
+    // get all pages in a collection
+    Page.find({collectionId: req.params.id}, function (err, pages) {
+      if(err) { return handleError(res, err); }
+      // ordering pages
+        var myResp = [];
+        collect.pageList.forEach(function (orderId) {
+          pages.forEach(function (searchPage, i) {
+            if (searchPage._id == orderId) {
+              myResp.push(searchPage);
+              pages.splice(i, 1);
+            }
+          });
+        });
+        return res.json(myResp);
+    });
+
   });
 };
 

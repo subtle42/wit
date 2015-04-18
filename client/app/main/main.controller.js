@@ -23,14 +23,13 @@ angular.module('meanApp')
         $timeout(function () {
           $scope.sortingPages = false;
         }, 0);
-        /*
+
         var list = [];
-        angular.forEach($rootScope.pages.list, function (page) {
+        angular.forEach($rootScope.pages.list, function (page, i) {
           list.push(page._id);
         });
         $rootScope.collections.selected.pageList = list;
         $rootScope.collections.update($rootScope.collections.selected);
-        */
       }
     };
 
@@ -139,7 +138,11 @@ angular.module('meanApp')
           page.active = false;
         });
         $rootScope.pages.add(newPageTitle, function () {
+          // after adding new page should be empty
           $rootScope.widgets.list = [];
+          // adding new page to collection
+          $rootScope.collections.selected.pageList.push($rootScope.pages.selected._id);
+          $rootScope.collections.update($rootScope.collections.selected);
         });
       }, function () {
         $log.log('add page modal was canceled');

@@ -20,7 +20,13 @@ angular.module('mean.factories').factory('CollectionService', function ($http, $
 		});
 	};
 
-	fac.update = function (page) {
+	fac.update = function (collect, callback) {
+		$http.put('/api/collections', collect)
+		.success(function (res) {
+			if (callback) { callback(); }
+		}).error(function (err) {
+			$log.log(err);
+		});
 	};
 
 	fac.remove = function (index) {

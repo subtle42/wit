@@ -144,7 +144,6 @@ function handleError(res, err, db) {
 function createNewSource(myFile, location, headers, count, userId, callback) {
   var columnList = [];
   investigateColumns(location, headers, function (myColumns) {
-    console.log('userId: ' + userId);
     var mySource = new Source({
       name: myFile.originalname,
       updated: Date.now(),

@@ -76,7 +76,8 @@ angular.module('mean.factories').factory('PageService', function ($http, $log, $
 			name: newPageTitle,
 			collectionId: $rootScope.collections.selected._id
 		}).success(function (res) {
-			fac.list.push(res);
+			fac.selected = res;
+			fac.list.push(fac.selected);
 			if (callback) { callback(); }
 		}).error(function (err) {
 			$log.log(err);
