@@ -51,14 +51,9 @@ angular.module('meanApp')
           // Get all widgets on a page
           $rootScope.widgets.getByPage($rootScope.pages.selected._id, function () {
             // Get list of all sources currently on page
-            var sourceList = [];
-            angular.forEach($rootScope.widgets.list, function (myWidget) {
-              if (sourceList.indexOf(myWidget.sourceId) === -1) {
-                sourceList.push(myWidget.sourceId);
-              }
-            });
+            var sourceList = $rootScope.widgets.getSourceList();
+            // Get source data for each source on page
             angular.forEach(sourceList, function (sourceId) {
-              // Get source data for each source on page
               $rootScope.data.get(sourceId);
             });
           });
@@ -72,7 +67,20 @@ angular.module('meanApp')
 
     $scope.pageSwitch = function (page) {
       $rootScope.pages.updateSelected(page, function () {
-        $rootScope.widgets.getByPage(page._id);
+        $rootScope.widgets.getByPage(page._id, function () {
+          var sourceList = $rootScope.widgets.getSourceList();
+          var currentSources = Object.keys($rootScope.data.list);
+          // if source is already loaded remove it from get list
+          angular.forEach(sourceList, function (sourceId, i) {
+            if (currentSources.indexOf(sourceId) !== -1) {
+              sourceList.splice(i, 1);
+            }
+          });
+          // getting all sources that are not currently loaded
+          angular.forEach(sourceList, function (sourceId) {
+            $rootScope.data.get(sourceId);
+          });
+        });
       });
     };
 
