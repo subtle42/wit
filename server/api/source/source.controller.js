@@ -15,7 +15,7 @@ var fs = require('fs');
 var csvParse = require('csv-parse');
 var auth = require('../../auth/auth.service');
 
-var Source = require('./Source.model');
+var Source = require('./source.model');
 
 // Get list of Sources by user
 exports.byUser = function (req, res) {
