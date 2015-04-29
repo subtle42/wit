@@ -117,7 +117,9 @@ exports.create = function(req, res) {
 
 // Updates an existing Source in the DB.
 exports.update = function(req, res) {
-  Source.findByIdAndUpdate(req.body._id, req.body, function (err, source) {
+  var myId = req.body._id;
+  delete req.body._id;
+  Source.findByIdAndUpdate(myId, req.body, function (err, source) {
     if (err) { return handleError(res, err); }
     if(!source) { return res.send(404); }
     return res.json(source);
