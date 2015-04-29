@@ -126,6 +126,10 @@ angular.module('meanApp')
 		}
 		var page = $rootScope.pages.selected;
 		$rootScope.widgets.add($scope.typeSelected.type, $scope.dsSelected, page, function (newWidget) {
+			// Adding widget to page's list of widgets
+			$rootScope.pages.selected.widgetList.push(newWidget._id);
+			$rootScope.pages.update($rootScope.pages.selected);
+			// Getting data if data is not currently loaded on the page
 			if (!$rootScope.data.list[$scope.dsSelected._id]) {
 				$rootScope.data.get($scope.dsSelected._id);
 			}	

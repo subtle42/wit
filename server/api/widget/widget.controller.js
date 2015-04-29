@@ -11,14 +11,28 @@
 
 var _ = require('lodash');
 var Widget = require('./widget.model');
+var Page = require('../page/page.model');
 
 // Get list of widgets by pageId
 exports.byPage = function (req, res) {
-  Widget.find({
-    pageId: req.params.id
-  }, function (err, widgets) {
-    if(err) { return handleError(res, err); }
-    return res.json(widgets)
+  Page.findById(req.params.id, function (err, page) {
+    if(err || !page) { return handleError(res, err); }
+    if (page.widgetList.length === 0) { return res.json([]); }
+    // Get all widgets on a page
+    Widget.find({
+      pageId: req.params.id
+    }, function (err, widgets) {
+      if(err) { return handleError(res, err); }
+      var widgetResponse = [];
+      page.widgetList.forEach(function (widgetId) {
+        widgets.forEach(function (myWidget) {
+          if (myWidget._id == widgetId) {
+            widgetResponse.push(myWidget);
+          }
+        });
+      });
+      return res.json(widgetResponse)
+    });
   });
 };
 

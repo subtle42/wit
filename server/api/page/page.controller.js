@@ -117,15 +117,12 @@ exports.create = function(req, res) {
 
 // Updates an existing page in the DB.
 exports.update = function(req, res) {
-  if(req.body._id) { delete req.body._id; }
-  Page.findById(req.params.id, function (err, page) {
-    if (err) { return handleError(res, err); }
+  var myId = req.body._id;
+  delete req.body._id;
+  Page.findByIdAndUpdate(myId, req.body, function (err, page) {
+    if(err) { return handleError(res, err); }
     if(!page) { return res.send(404); }
-    var updated = _.merge(page, req.body);
-    updated.save(function (err) {
-      if (err) { return handleError(res, err); }
-      return res.json(200, page);
-    });
+    return res.json(page);
   });
 };
 

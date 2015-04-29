@@ -3,7 +3,7 @@
 angular.module('meanApp')
 	.directive('widget', function ($modal) {
     	return {
-			restrict: 'E',
+			restrict: 'AE',
 			scope: {
 				widget: '=widget'
 			},

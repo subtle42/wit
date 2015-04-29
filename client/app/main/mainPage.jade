@@ -31,7 +31,9 @@ span
 				i.fa.fa-share-alt.fa-lg
 			button.btn.btn-default(ng-click="sourceConfigModal()")
 				i.fa.fa-cog.fa-lg
-	span.widget-container(ui-sortable="widgetSortOptions",
-		ng-model="widgets.list")
-		widget(ng-repeat="w in widgets.list",
-			widget="w")
+	span.widget-container
+		ul(ui-sortable="widgetSortOptions",
+			ng-model="widgets.list",
+			style="list-style-type: none; padding: 0px")
+			li(ng-repeat="w in widgets.list",
+				widget="w")

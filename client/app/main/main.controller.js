@@ -34,11 +34,18 @@ angular.module('meanApp')
     };
 
     $scope.widgetSortOptions = {
-      connectWith: 'widget-container',
       handle: '.widgetheader',
-      items: 'widget',
       start: function (e, ui) {
         ui.helper.width('100%');
+      },
+      stop: function (e, ui) {
+        var widgetIdsList = [];
+        angular.forEach($rootScope.widgets.list, function (widget) {
+          widgetIdsList.push(widget._id);
+        });
+        $rootScope.pages.selected.widgetList = widgetIdsList;
+        $log.log('sort option save');
+        $rootScope.pages.update($rootScope.pages.selected);
       }
     };
 

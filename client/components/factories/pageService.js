@@ -45,8 +45,12 @@ angular.module('mean.factories').factory('PageService', function ($http, $log, $
 	};
 
 	fac.update = function (page) {
-		$http.put('api/page', page)
-			.success(function (data) {});
+		$http.put('api/pages', page)
+		.success(function (data) {
+			$log.log('page update success');
+		}).error(function (err) {
+			$log.log(err);
+		});
 	};
 
 	fac.setOrder = function () {
