@@ -6,7 +6,8 @@ var mongoose = require('mongoose'),
 var PageSchema = new Schema({
   name: { type: String, default: 'Default'},
   collectionId: { type: String, requried: true },
-  widgetList: { type: Array, default: [] },
+  widgetList: { type: Array, default: [[],[]] },
+  columnCount: { type: Number, default: 2 },
   active: { type: Boolean, default: true}
 });
 

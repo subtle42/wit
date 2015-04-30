@@ -27,13 +27,29 @@ span
 				| Add Chart 
 				i.fa.fa-plus-square
 		span.pull-right
+			div.btn-group(role="group",
+				aria-label="...")
+				button.btn.btn-default(type="button",
+					ng-click="changeColumnCount(1)")
+					| 1
+				button.btn.btn-default(type="button",
+					ng-click="changeColumnCount(2)")
+					| 2
+				button.btn.btn-default(type="button",
+					ng-click="changeColumnCount(3)")
+					| 3
+				button.btn.btn-default(type="button",
+					ng-click="changeColumnCount(4)")
+					| 4
 			button.btn.btn-default(type="button")
 				i.fa.fa-share-alt.fa-lg
 			button.btn.btn-default(ng-click="sourceConfigModal()")
 				i.fa.fa-cog.fa-lg
-	span.widget-container
-		ul(ui-sortable="widgetSortOptions",
-			ng-model="widgets.list",
-			style="list-style-type: none; padding: 0px")
-			li(ng-repeat="w in widgets.list",
-				widget="w")
+	//-div.widget-container.pull-left(ng-repeat="widgetColumn in widgets.list",
+		style="width:50%")
+	ul.widget-container.pull-left(ui-sortable="widgetSortOptions",
+		ng-repeat="widgetColumn in widgets.list",
+		ng-model="widgetColumn",
+		style="list-style-type: none; padding: 0px; width: {{100/widgets.list.length}}%; min-height: {{minWidgetColumnHeight}}px")
+		li(ng-repeat="w in widgetColumn",
+			widget="w")

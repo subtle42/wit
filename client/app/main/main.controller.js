@@ -35,16 +35,26 @@ angular.module('meanApp')
 
     $scope.widgetSortOptions = {
       handle: '.widgetheader',
+      connectWith: '.widget-container',
       start: function (e, ui) {
-        ui.helper.width('100%');
+        var percent = 100 / $rootScope.widgets.list.length;
+        ui.helper.width( percent + '%');
       },
       stop: function (e, ui) {
-        var widgetIdsList = [];
-        angular.forEach($rootScope.widgets.list, function (widget) {
-          widgetIdsList.push(widget._id);
+        // resetting widget column height
+        jQuery('.widget-container').css('min-height', '0px');
+        var maxSize = 0;
+        // finding longest column
+        jQuery('.widget-container').each(function () {
+          var newSize = jQuery(this).height();
+          if (newSize > maxSize) {
+            maxSize = newSize;
+          }
         });
-        $rootScope.pages.selected.widgetList = widgetIdsList;
-        $log.log('sort option save');
+        // setting all columns to be as long as the longest
+        $scope.minWidgetColumnHeight = maxSize;
+        // updating widget list inside page object
+        $rootScope.pages.selected.widgetList = $rootScope.widgets.getWidgetIds();
         $rootScope.pages.update($rootScope.pages.selected);
       }
     };
@@ -88,6 +98,38 @@ angular.module('meanApp')
           });
         });
       });
+    };
+
+    $scope.changeColumnCount = function (newCount) {
+      if ($rootScope.pages.selected.columnCount > newCount) {
+        while ($rootScope.widgets.list.length > newCount) {
+          var lastColumn = $rootScope.widgets.list.pop();
+          angular.forEach(lastColumn, function (widget) {
+            var smallestColumn = $scope._findSmallestColumn();
+            smallestColumn.push(widget);
+          });
+        }
+      } else if ($rootScope.widgets.list.length < newCount) {
+        while (newCount < $rootScope.widgets.list.length) {
+          $rootScope.widgets.list.push([]);
+          $rootScope.pages.selected.widgetList.push([]);
+        }
+      }
+      $rootScope.pages.selected.columnCount = newCount;
+      $rootScope.pages.update($rootScope.pages.selected);
+    };
+
+    $scope._findSmallestColumn = function () {
+      // find column with the least number of widgets
+      var min = 1000;
+      var smallestColumn = null;
+      angular.forEach($rootScope.widgets.list, function (widgetColumn) {
+        if (widgetColumn.length < min) {
+          smallestColumn = widgetColumn;
+          min = widgetColumn.length;
+        }
+      });
+      return smallestColumn;
     };
 
     /////////////////////////////////////////////////////////////////////////////////////

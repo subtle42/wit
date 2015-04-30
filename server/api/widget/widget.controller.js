@@ -17,18 +17,25 @@ var Page = require('../page/page.model');
 exports.byPage = function (req, res) {
   Page.findById(req.params.id, function (err, page) {
     if(err || !page) { return handleError(res, err); }
-    if (page.widgetList.length === 0) { return res.json([]); }
+    //if (page.widgetList.length === 0) {return res.json([]); }
     // Get all widgets on a page
     Widget.find({
       pageId: req.params.id
     }, function (err, widgets) {
       if(err) { return handleError(res, err); }
+      if(widgets.length == 0) {
+        res.json(page.widgetList);
+      }
+
       var widgetResponse = [];
-      page.widgetList.forEach(function (widgetId) {
-        widgets.forEach(function (myWidget) {
-          if (myWidget._id == widgetId) {
-            widgetResponse.push(myWidget);
-          }
+      page.widgetList.forEach(function (widgetColumn, i) {
+        widgetResponse.push([]);
+        widgetColumn.forEach(function (widgetId) {
+          widgets.forEach(function (myWidget) {
+            if (myWidget._id == widgetId) {
+              widgetResponse[i].push(myWidget);
+            }
+          });
         });
       });
       return res.json(widgetResponse)

@@ -37,7 +37,8 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 			series: myConfig.series,
 			groups: myConfig.groups
 		}).success(function (newWidget) {
-			fac.list.push(newWidget);
+			var columnToAppend = fac._findSmallestColumn();
+			columnToAppend.push(newWidget);
 			if (callback) { callback(newWidget); }
 		}).error(function (err) {
 			$log.log(err);
@@ -56,13 +57,41 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 	fac.getSourceList = function () {
 		var sourceList = [];
 
-		angular.forEach(fac.list, function (widget) {
-			if (sourceList.indexOf(widget.sourceId) === -1) {
-				sourceList.push(widget.sourceId);
-			}
+		angular.forEach(fac.list, function (widgetColumn) {
+			angular.forEach(widgetColumn, function (widget) {
+				if (sourceList.indexOf(widget.sourceId) === -1) {
+					sourceList.push(widget.sourceId);
+				}
+			});
 		});
 
 		return sourceList;
+	};
+
+	fac._findSmallestColumn = function () {
+	// find column with the least number of widgets
+		var min = 10000;
+		var smallestColumn = null;
+		angular.forEach(fac.list, function (widgetColumn) {
+			if (widgetColumn.length < min) {
+				smallestColumn = widgetColumn;
+				min = widgetColumn.length;
+			}
+		});
+		return smallestColumn;
+	};
+
+	fac.getWidgetIds = function () {
+		var response = [];
+		angular.forEach(fac.list, function (widgetColumn) {
+			var columnIds = [];
+			angular.forEach(widgetColumn, function (myWidget) {
+				columnIds.push(myWidget._id);
+			});
+			response.push(columnIds);
+		});
+		$log.log(response);
+		return response;
 	};
 
 	fac._getChartDefaults = function (type, source) {
