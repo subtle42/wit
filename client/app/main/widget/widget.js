@@ -171,7 +171,10 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 		});
 		
 		myModal.result.then(function () {
-			$rootScope.widgets.remove($scope.widget);
+			$rootScope.widgets.remove($scope.widget, function () {
+				$rootScope.pages.selected.widgetList = $rootScope.widgets.getWidgetIds();
+				$rootScope.pages.update($rootScope.pages.selected);
+			});
 		}, function () {
 			$log.log('delete widget modal was canceled');
 		});

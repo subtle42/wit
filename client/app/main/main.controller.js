@@ -41,22 +41,26 @@ angular.module('meanApp')
         ui.helper.width( percent + '%');
       },
       stop: function (e, ui) {
-        // resetting widget column height
-        jQuery('.widget-container').css('min-height', '0px');
-        var maxSize = 0;
-        // finding longest column
-        jQuery('.widget-container').each(function () {
-          var newSize = jQuery(this).height();
-          if (newSize > maxSize) {
-            maxSize = newSize;
-          }
-        });
-        // setting all columns to be as long as the longest
-        $scope.minWidgetColumnHeight = maxSize;
+        $scope._fixColumnDropArea();
         // updating widget list inside page object
         $rootScope.pages.selected.widgetList = $rootScope.widgets.getWidgetIds();
         $rootScope.pages.update($rootScope.pages.selected);
       }
+    };
+
+    $scope._fixColumnDropArea = function () {
+      // resetting widget column height
+      jQuery('.widget-container').css('min-height', '0px');
+      var maxSize = 0;
+      // finding longest column
+      jQuery('.widget-container').each(function () {
+        var newSize = jQuery(this).height();
+        if (newSize > maxSize) {
+          maxSize = newSize;
+        }
+      });
+      // setting all columns to be as long as the longest
+      $scope.minWidgetColumnHeight = maxSize;
     };
 
     $scope.pageLoad = function () {
@@ -66,6 +70,7 @@ angular.module('meanApp')
         $rootScope.pages.getByCollection($rootScope.collections.selected._id, function () {
           // Get all widgets on a page
           $rootScope.widgets.getByPage($rootScope.pages.selected._id, function () {
+            $scope._fixColumnDropArea();
             // Get list of all sources currently on page
             var sourceList = $rootScope.widgets.getSourceList();
             // Get source data for each source on page
@@ -110,13 +115,22 @@ angular.module('meanApp')
           });
         }
       } else if ($rootScope.widgets.list.length < newCount) {
-        while (newCount < $rootScope.widgets.list.length) {
+        while ($rootScope.widgets.list.length < newCount) {
           $rootScope.widgets.list.push([]);
           $rootScope.pages.selected.widgetList.push([]);
         }
       }
       $rootScope.pages.selected.columnCount = newCount;
+      $rootScope.pages.selected.widgetList = $rootScope.widgets.getWidgetIds();
       $rootScope.pages.update($rootScope.pages.selected);
+      $scope._fixColumnDropArea();
+
+      var myKeys = Object.keys($rootScope.widgets.filterList);
+      angular.forEach(myKeys, function (key) {
+        angular.forEach($rootScope.widgets.filterList[key], function (item) {
+          item.chart.resize();
+        });
+      });
     };
 
     $scope._findSmallestColumn = function () {

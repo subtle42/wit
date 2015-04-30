@@ -15,13 +15,16 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 		});
 	};
 
-	fac.remove = function (widget) {
+	fac.remove = function (widget, callback) {
 		$http.delete('api/widgets/' + widget._id)
 		.success(function (res) {
-			var index = fac.list.indexOf(widget);
-			if (index !== -1) {
-				fac.list.splice(index, 1);	
-			}
+			angular.forEach(fac.list, function (widgetColumn) {
+				var index = widgetColumn.indexOf(widget);
+				if (index !== -1) {
+					widgetColumn.splice(index, 1);
+				}
+			});
+			if (callback) { callback(); }
 		}).error(function (err) {
 			$log.log(err);
 		});
@@ -90,7 +93,6 @@ angular.module('mean.factories').factory('WidgetService', function ($log, $http,
 			});
 			response.push(columnIds);
 		});
-		$log.log(response);
 		return response;
 	};
 
