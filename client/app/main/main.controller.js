@@ -60,7 +60,7 @@ angular.module('meanApp')
         }
       });
       // setting all columns to be as long as the longest
-      $scope.minWidgetColumnHeight = maxSize;
+      jQuery('.widget-container').css('min-height', maxSize + 'px');
     };
 
     $scope.pageLoad = function () {
@@ -169,6 +169,20 @@ angular.module('meanApp')
       });
     };
 
+    $scope.pageConfigModal = function () {
+      var myModal = $modal.open({
+        templateUrl: 'app/main/modals/pageConfig/pageConfig.html',
+        size: 'lg',
+        controller: 'PageConfigCtrl'
+      });
+
+      myModal.result.then(function (source) {
+        $log.log('done');
+      }, function () {
+        $log.log('asfwas canceled');
+      });
+    };
+
     $scope.sourceConfigModal = function () {
       var myModal = $modal.open({
         templateUrl: 'app/main/modals/sourceConfig/sourceConfig.html',
@@ -185,7 +199,7 @@ angular.module('meanApp')
         });
       }, function () {
         $log.log('souce config modal was canceled');
-      })
+      });
     };
 
     $scope.addPageModal = function () {

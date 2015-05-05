@@ -30,4 +30,15 @@ angular.module('mean.filters')
 		});
 		return respose;
 	};
+})
+.filter('sourceDuplicates', function () {
+	return function (sources, alreadySelected) {
+		var response = [];
+		angular.forEach(sources, function (source) {
+			if (source !== alreadySelected) {
+				response.push(source);
+			}
+		});
+		return response;
+	};
 });

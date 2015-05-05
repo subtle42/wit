@@ -28,7 +28,7 @@ span
 				i.fa.fa-plus-square
 		span.pull-right
 			div.btn-group(role="group",
-				aria-label="...")
+				aria-label="")
 				button.btn.btn-default(type="button",
 					ng-click="changeColumnCount(1)")
 					| 1
@@ -41,15 +41,13 @@ span
 				button.btn.btn-default(type="button",
 					ng-click="changeColumnCount(4)")
 					| 4
-			button.btn.btn-default(type="button")
+			button.btn.btn-default(ng-click="pageConfigModal()")
 				i.fa.fa-share-alt.fa-lg
 			button.btn.btn-default(ng-click="sourceConfigModal()")
 				i.fa.fa-cog.fa-lg
-	//-div.widget-container.pull-left(ng-repeat="widgetColumn in widgets.list",
-		style="width:50%")
 	ul.widget-container.pull-left(ui-sortable="widgetSortOptions",
 		ng-repeat="widgetColumn in widgets.list",
 		ng-model="widgetColumn",
-		style="list-style-type: none; padding: 0px; width: {{100/widgets.list.length}}%; min-height: {{minWidgetColumnHeight}}px")
+		style="list-style-type: none; padding: 0px; width: {{100/widgets.list.length}}%")
 		li(ng-repeat="w in widgetColumn",
 			widget="w")

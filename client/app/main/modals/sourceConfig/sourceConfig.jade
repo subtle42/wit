@@ -8,7 +8,7 @@ div.modal-body(style="425px")
 		div.left-inner-addon
 			i.fa.fa-search
 			input.form-control(type="text",
-				ng-model="search.title",
+				ng-model="search.name",
 				placeholder="Search Data Sources")
 		ul.list-group(style="height:350px; overflow-y:auto")
 			a(ng-repeat="ds in sourceList | filter:search:strict",
