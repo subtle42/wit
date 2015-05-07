@@ -1,0 +1,95 @@
+div.modal-header
+	h3.modal-title
+		| Page Config
+div.modal-body(style="height:400px")
+	tabset(justified="true")
+		tab(heading="Data Links")
+			div.pull-left(style="width:40%")
+				div(ng-show="showSource1 == false && source1")
+					label
+						| {{source1.name}}
+					a(ng-click="editSource1()")
+						| Edit
+				div(ng-show="showSource1")
+					div.left-inner-addon
+						i.fa.fa-search
+						input.form-control(type="text",
+							ng-model="search.name",
+							placeholder="Select Source")
+					ul.list-group(style="height:350px; overflow-y:auto")
+						a(ng-repeat="ds in sourceList | filter:search:strict | sourceDuplicates:source2",
+							ng-click="selectSource1(ds)",
+							ng-class="{'list-group-item': true,\
+								'active': source1._id == ds._id,\
+								'list-group-item-success': ds.type == 1,\
+								'list-group-item-info': ds.type == 2,\
+								'list-group-item-warning': ds.type == 3}")
+							| {{ds.name}}
+							span.pull-right
+								i.fa.fa-lg.fa-file-excel-o(ng-class="{'fa fa-lg': true,\
+									'fa-file-excel-o': ds.type == 1,\
+									'fa-database': ds.type == 2,\
+									'fa-code': ds.type == 3}")
+								i.fa.fa-lg.fa-share-alt
+				div(ng-show="showFields1")
+					ul.list-group(style="height:350px; overflow-y:auto")
+						a(ng-repeat="columns1 in source1.columns",
+							ng-click="selectField1(columns1)",
+							ng-class="{'list-group-item': true,\
+								'active': false}")
+							| {{columns1.name}}
+				div(ng-show="showFields1 == false && field1")
+					label
+						| {{field1.name}}
+					a(ng-click="editFields1()")
+						| Edit
+			div.pull-right(style="width:40%")
+				div(ng-show="showSource2 == false && source2")
+					label
+						| {{source2.name}}
+					a(ng-click="editSource2()")
+						| Edit
+				div(ng-show="showSource2")
+					div.left-inner-addon
+						i.fa.fa-search
+						input.form-control(type="text",
+							ng-model="search.name",
+							placeholder="Select Source")
+					ul.list-group(style="height:350px; overflow-y:auto")
+						a(ng-repeat="ds in sourceList | filter:search:strict | sourceDuplicates:source1",
+							ng-click="selectSource2(ds)",
+							ng-class="{'list-group-item': true,\
+								'active': source2._id == ds._id,\
+								'list-group-item-success': ds.type == 1,\
+								'list-group-item-info': ds.type == 2,\
+								'list-group-item-warning': ds.type == 3}")
+							| {{ds.name}}
+							span.pull-right
+								i.fa.fa-lg.fa-file-excel-o(ng-class="{'fa fa-lg': true,\
+									'fa-file-excel-o': ds.type == 1,\
+									'fa-database': ds.type == 2,\
+									'fa-code': ds.type == 3}")
+								i.fa.fa-lg.fa-share-alt
+				div(ng-show="showFields2")
+					ul.list-group(style="height:350px; overflow-y:auto")
+						a(ng-repeat="columns2 in source2.columns",
+							ng-click="selectField2(columns2)",
+							ng-class="{'list-group-item': true,\
+								'active': false}")
+							| {{columns2.name}}
+				div(ng-show="showFields2 == false && field2")
+					label
+						| {{field2.name}}
+					a(ng-click="editFields2()")
+						| Edit
+			div.list-group.pull-left(style="width: 100%")
+				a.list-group-item
+					center
+						| source1: field4 - field2 :sourc2
+div.modal-footer
+	button.btn.btn-warning(ng-click="cancel()")
+		| Cancel
+	button(ng-click="save()",
+		ng-class="{'btn btn-primary': true, 'disabled': !validForm()}",
+		ng-disabled="!validForm()")
+		| Save
