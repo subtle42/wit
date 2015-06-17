@@ -383,6 +383,7 @@ var D3Pie = function (config, data, myDirEle, filterList) {
     chart.init = function () {
         chart.buildFocus();
         chart.buildDisplay();
+        chart.buildLegend();
     };
 
     chart.buildFocus = function () {
@@ -425,12 +426,6 @@ var D3Pie = function (config, data, myDirEle, filterList) {
             });
     };
 
-    chart.links = function (myString) {
-        angular.forEach(chart.links, function (link) {
-
-        });
-    };
-
     chart.draw = function () {
         // errors are thrown in d3 if there is no data set, settting chart to hidden
         if (chart.data.all.reduceCount().value() === 0) {
@@ -462,7 +457,46 @@ var D3Pie = function (config, data, myDirEle, filterList) {
         chart.focus
             .attr('transform', 'translate(' + width/2 + ',' + height/2 + ')');
         chart.arc.outerRadius(chart.radius);
-        //chart.slice.attr('d',chart.arc);
+        chart.path.attr('d', chart.arc);
+    };
+
+    chart.buildLegend = function () {
+        return;
+        var legend = chart.svg.append('g')
+            .attr('class', 'legend')
+            .attr('height', 100)
+            .attr('width', 100)
+            .attr('transform', 'translate(-20,10)');
+
+        var legendRect = legend.selectAll('rect').data(chart.group.all());
+        
+        legendRect.enter()
+            .append('rect')
+            .attr('x', chart.width-65)
+            .attr('width', 10)
+            .attr('height', 10);
+
+        legendRect
+            .attr('y', function (d, i) {
+                return i * 20;
+            })
+            .style('fill', function (d) {
+                return chart.color(d.key);
+            });
+
+        var legengText = legend.selectAll('text').data(chart.group.all());
+        
+        legengText.enter()
+            .append('text')
+            .attr('x', chart.width - 52);
+
+        legengText
+            .attr('y', function (d, i) {
+                return i * 20 + 9;
+            })
+            .text(function (d) {
+                return d.key;
+            });
     };
 
     chart.init();
