@@ -377,13 +377,13 @@ var D3Pie = function (config, data, myDirEle, filterList) {
     chart.color = d3.scale.category20().domain(chart.group.all().map(function (d) {
         return d.key;
     }));
-    chart.links = [];
+    chart.filterKeys = [];
     
 
     chart.init = function () {
         chart.buildFocus();
         chart.buildDisplay();
-        chart.buildLegend();
+        //chart.buildLegend();
     };
 
     chart.buildFocus = function () {
@@ -393,6 +393,8 @@ var D3Pie = function (config, data, myDirEle, filterList) {
             .attr('height', chart.height + chart.margins.top + chart.margins.bottom)
             .on('click', function () {
                 chart.dimension.filterAll();
+                chart.filterKeys = [];
+                chart.path.classed('background', false);
                 chart._runFilter();
             });
 
@@ -421,7 +423,32 @@ var D3Pie = function (config, data, myDirEle, filterList) {
             .attr('d', chart.arc)
             .on('click', function (d) {
                 d3.event.stopPropagation();
-                chart.dimension.filter(d.data.key);
+                // adds key if not in list or removes if already present
+                if (chart.filterKeys.indexOf(d.data.key) !== -1) {
+                    chart.filterKeys.splice(chart.filterKeys.indexOf(d.data.key), 1);
+                } else {
+                    chart.filterKeys.push(d.data.key);
+                }
+
+                // if there are no keys in the list, all slices have color, clear filter and return
+                if (chart.filterKeys.length === 0) {
+                    chart.path.classed('background', false);
+                    chart.dimension.filterAll();
+                    chart._runFilter();
+                    return;
+                }
+
+                // all slices not selected become background
+                chart.path.classed('background', function (d) {
+                    if (chart.filterKeys.indexOf(d.data.key) !== -1) {
+                        return false;
+                    }
+                    return true;
+                });
+                // run filter for everything in list
+                chart.dimension.filter(function (d) {
+                    return chart.filterKeys.indexOf(d) !== -1;
+                });
                 chart._runFilter();
             });
     };
@@ -461,7 +488,6 @@ var D3Pie = function (config, data, myDirEle, filterList) {
     };
 
     chart.buildLegend = function () {
-        return;
         var legend = chart.svg.append('g')
             .attr('class', 'legend')
             .attr('height', 100)
