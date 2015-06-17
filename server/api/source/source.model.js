@@ -11,8 +11,7 @@ var SourceSchema = new Schema({
 	location: { type: String, default: '' },
 	type: { type: Number, default: 0 },
 	createdBy: { type: String, require: true },
-	columns: { type: Array, default: [] },
-	sourceLinks: { type: Array, default: []}
+	columns: { type: Array, default: [] }
 });
 
 module.exports = mongoose.model('Source', SourceSchema);

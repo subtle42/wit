@@ -12,6 +12,7 @@ angular.module('meanApp')
 	$scope.showFields1 = false;
 	$scope.showSource2 = true;
 	$scope.showFields2 = false;
+	$scope.linkList = angular.copy($rootScope.pages.selected.sourceLinks);
 
 	/////////////////////////////////////////////////////////////////////////////////
 	// Left side functions
@@ -76,8 +77,30 @@ angular.module('meanApp')
 			return false;
 		} else if (!$scope.field1 || !$scope.field2) {
 			return false;
+		} else if ($scope.isDuplicateLink()) {
+			return false;
 		}
 		return true;
+	};
+
+	$scope.isDuplicateLink = function () {
+		var isDuplicate = false;
+
+		angular.forEach($scope.linkList, function (linkArray) {
+			var duplicateCount = 0;
+			angular.forEach(linkArray, function (link) {
+				if ($scope.source1._id === link.source && $scope.field1.ref === link.field) {
+					duplicateCount++;
+				}
+				if ($scope.source2._id === link.source && $scope.field2.ref === link.field) {
+					duplicateCount++;
+				}
+			});
+			if (duplicateCount === 2) {
+				isDuplicate = true;
+			}
+		});
+		return isDuplicate;
 	};
 
 	$scope.save = function () {
@@ -90,7 +113,27 @@ angular.module('meanApp')
 		}];
 		$modalInstance.close(response);
 	};
+	
 	$scope.cancel = function () {
 		$modalInstance.dismiss('cancel');
 	};
+
+	$scope.init = function () {
+		angular.forEach($scope.linkList, function (linkArray) {
+			angular.forEach(linkArray, function (link) {
+				angular.forEach($rootScope.sources.list, function (source) {
+					if (link.source === source._id) {
+						link.sourceName = source.name;
+						angular.forEach(source.columns, function (column) {
+							if (link.field === column.ref) {
+								link.fieldName = column.name;
+							}
+						});
+					}
+				});				
+			});
+		});
+	};
+
+	$scope.init();
 });

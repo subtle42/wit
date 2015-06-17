@@ -176,8 +176,11 @@ angular.module('meanApp')
         controller: 'PageConfigCtrl'
       });
 
-      myModal.result.then(function (source) {
-        $log.log('done');
+      myModal.result.then(function (link) {
+        $rootScope.pages.selected.sourceLinks.push(link);
+        $rootScope.pages.update($rootScope.pages.selected, function () {
+          $log.log('aved');
+        });
       }, function () {
         $log.log('asfwas canceled');
       });

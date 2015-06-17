@@ -23,6 +23,65 @@ angular.module('mean.charts')
                 $scope.chart.resize(element.width());
             });
 
+            $scope.addMissingLinkDimensions = function () {
+                var sourcesOnPage = $rootScope.widgets.getSourceList();
+                angular.forEach($rootScope.pages.selected.sourceLinks, function (linkArray) {
+                    angular.forEach(linkArray, function (link) {
+                        // if source is not on page skip
+                        if (sourcesOnPage.indexOf(link.source) === -1) {
+                            return;
+                        }
+                        var tmpData = $rootScope.data.list[link.source];
+                        // create dimension if source exists but dimension does not
+                        if (!tmpData[link.field]) {
+                            tmpData[link.field] = tmpData.main.dimension(function (d) {
+                                return d[link.field];
+                            });
+                        }
+                    });
+                });
+            };
+
+            $scope.checkAllSourcesAreLoaded = function (callback) {
+                var sourceList = $rootScope.widgets.getSourceList();
+                var allLoaded = true;
+                angular.forEach(sourceList, function (source) {
+                    if (!$rootScope.data.list[source]) {
+                        allLoaded = false;
+                    }
+                });
+                if (!allLoaded) {
+                    setTimeout($scope.checkAllSourcesAreLoaded, 1000);
+                } else {
+                    if (callback) { callback();}
+                }
+            };
+
+            $scope.createDimesionList = function (dimensionObj, dimensionField) {
+                var dimList = [];
+                angular.forEach($rootScope.pages.selected.sourceLinks, function (linkArray) {
+                    var inLink = false;
+                    angular.forEach(linkArray, function (link) {
+                        if ($scope.source._id === link.source && dimensionField === link.field) {
+                            inLink = true;
+                        }
+                    });
+
+                    if (inLink) {
+                        angular.forEach(linkArray, function (link) {
+                            var tmpData = $rootScope.data.list[link.source];
+                            dimList.push(tmpData[link.field]);
+                        });
+                    }
+                });
+
+                var currentDimIndex = dimList.indexOf(dimensionObj);
+                if (currentDimIndex !== -1) {
+                    dimList = dimList.splice(currentDimIndex, 1);
+                }
+                return dimList;
+            };
+
             $scope.buildChart = function () {
                 if ($scope.chart) {
                     $scope.chart.svg.remove();
@@ -43,6 +102,8 @@ angular.module('mean.charts')
                             });
                         }
                     });
+                    //var tmp = $scope.createDimesionList($scope.data[$scope.widget.groups[0].ref], $scope.widget.groups[0].ref);
+                    //$log.log(tmp);
                     $scope.chart = new D3Pie($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
                 } else if ($scope.widget.type === 'histogram') {
                     angular.forEach($scope.widget.series, function (serie) {
@@ -53,10 +114,13 @@ angular.module('mean.charts')
                             });
                         }
                     });
-
+                    //var tmp = $scope.createDimesionList($scope.data[$scope.widget.series[0]], $scope.widget.series[0]);
+                    //$log.log(tmp);
                     $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
                 }
-                
+                $scope.checkAllSourcesAreLoaded(function () {
+                    $scope.addMissingLinkDimensions();
+                });
             };
         }
     };
@@ -313,7 +377,7 @@ var D3Pie = function (config, data, myDirEle, filterList) {
     chart.color = d3.scale.category20().domain(chart.group.all().map(function (d) {
         return d.key;
     }));
-
+    chart.links = [];
     
 
     chart.init = function () {
@@ -359,6 +423,12 @@ var D3Pie = function (config, data, myDirEle, filterList) {
                 chart.dimension.filter(d.data.key);
                 chart._runFilter();
             });
+    };
+
+    chart.links = function (myString) {
+        angular.forEach(chart.links, function (link) {
+
+        });
     };
 
     chart.draw = function () {

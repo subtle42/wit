@@ -83,9 +83,9 @@ div.modal-body(style="height:400px")
 					a(ng-click="editFields2()")
 						| Edit
 			div.list-group.pull-left(style="width: 100%")
-				a.list-group-item
+				a.list-group-item(ng-repeat="link in linkList")
 					center
-						| source1: field4 - field2 :sourc2
+						| {{link[0].sourceName}} : {{link[0].fieldName}}  -  {{link[1].sourceName}} : {{link[1].fieldName}}
 div.modal-footer
 	button.btn.btn-warning(ng-click="cancel()")
 		| Cancel
