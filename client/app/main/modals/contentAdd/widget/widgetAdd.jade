@@ -28,11 +28,11 @@ div(ng-hide="pages.page2")
 				'list-group-item-warning': ds.type == 3}")
 				| {{ds.name}}
 				span.pull-right
-				i(ng-class="{'fa fa-lg': true,\
-					'fa-file-excel-o': ds.type == 1,\
-					'fa-database': ds.type == 2,\
-					'fa-code': ds.type == 3}")
-				i.fa.fa-lg.fa-share-alt
+					i(ng-class="{'fa fa-lg': true,\
+						'fa-file-excel-o': ds.type == 1,\
+						'fa-database': ds.type == 2,\
+						'fa-code': ds.type == 3}")
+					i.fa.fa-lg.fa-share-alt
 	div.well(style="float:right; width:50%")
 		| Name: {{dsSelected.name}}
 		br

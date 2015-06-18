@@ -31,6 +31,14 @@
  * App-wide Styles
  */
 
+.expandWidget {
+    top: 0px;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: 100;
+}
+
 .browsehappy {
     margin: 0.2em 0;
     background: #ccc;

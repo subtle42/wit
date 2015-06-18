@@ -20,7 +20,14 @@ angular.module('mean.charts')
 
             // Fires on window resize
             $(window).resize(function () {
-                $scope.chart.resize(element.width());
+                var height;
+                if ($scope.widget.maximize === true) {
+                    height = $(window).height()-97-20;
+                } else {
+                    height = undefined;
+                }
+                $scope.chart.resize(element.width(), height);   
+                
             });
 
             $scope.addMissingLinkDimensions = function () {
@@ -57,31 +64,6 @@ angular.module('mean.charts')
                 }
             };
 
-            $scope.createDimesionList = function (dimensionObj, dimensionField) {
-                var dimList = [];
-                angular.forEach($rootScope.pages.selected.sourceLinks, function (linkArray) {
-                    var inLink = false;
-                    angular.forEach(linkArray, function (link) {
-                        if ($scope.source._id === link.source && dimensionField === link.field) {
-                            inLink = true;
-                        }
-                    });
-
-                    if (inLink) {
-                        angular.forEach(linkArray, function (link) {
-                            var tmpData = $rootScope.data.list[link.source];
-                            dimList.push(tmpData[link.field]);
-                        });
-                    }
-                });
-
-                var currentDimIndex = dimList.indexOf(dimensionObj);
-                if (currentDimIndex !== -1) {
-                    dimList = dimList.splice(currentDimIndex, 1);
-                }
-                return dimList;
-            };
-
             $scope.buildChart = function () {
                 if ($scope.chart) {
                     $scope.chart.svg.remove();
@@ -90,6 +72,8 @@ angular.module('mean.charts')
 
                 $scope.widget.width = element.width();
                 $scope.data = $rootScope.data.list[$scope.source._id];
+
+
 
                 
                 $scope.subset = $rootScope.data.list[$scope.source._id].all.value();
@@ -102,9 +86,8 @@ angular.module('mean.charts')
                             });
                         }
                     });
-                    //var tmp = $scope.createDimesionList($scope.data[$scope.widget.groups[0].ref], $scope.widget.groups[0].ref);
-                    //$log.log(tmp);
                     $scope.chart = new D3Pie($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
+                    
                 } else if ($scope.widget.type === 'histogram') {
                     angular.forEach($scope.widget.series, function (serie) {
                         if (!$scope.data[serie.ref]) {
@@ -114,8 +97,6 @@ angular.module('mean.charts')
                             });
                         }
                     });
-                    //var tmp = $scope.createDimesionList($scope.data[$scope.widget.series[0]], $scope.widget.series[0]);
-                    //$log.log(tmp);
                     $scope.chart = new D3Histogram($scope.widget, $scope.data, element[0], $rootScope.widgets.filterList[$scope.source._id]);
                 }
                 $scope.checkAllSourcesAreLoaded(function () {
@@ -383,7 +364,7 @@ var D3Pie = function (config, data, myDirEle, filterList) {
     chart.init = function () {
         chart.buildFocus();
         chart.buildDisplay();
-        //chart.buildLegend();
+        chart.buildLegend();
     };
 
     chart.buildFocus = function () {

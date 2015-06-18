@@ -117,7 +117,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 	$scope.maximize = function() {
 		if ($scope.widget.maximize === true) {
 			$scope.widget.maximize = false;
-			$timeout(function () { $scope.chart.refit(); }, 20);
+			$timeout(function () { $scope.chart.resize(); }, 20);
 			return;
 		}
 		// If maximizing a collapsed widget is opened 
@@ -125,7 +125,7 @@ var widgetCtrl = function($scope, $rootScope, $modal, $log, $window, $timeout) {
 			$scope.widget.collapse = false;
 		}
 		$scope.widget.maximize = true;
-		$timeout(function () { $scope.chart.refit(); }, 20);
+		$timeout(function () { $scope.chart.resize($(window).width(), $(window).height()-93-20); }, 20);
 	};
 
 	$scope.lock = function () {

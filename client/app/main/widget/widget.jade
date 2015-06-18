@@ -1,5 +1,6 @@
 div.widget-main.panel.panel-primary(id="{{widget.name}}",
-	ng-class="{'expandWidget': widget.maximize}")
+	ng-class="{'expandWidget': widget.maximize}",
+	style="margin:0px")
 	div.panel-heading.widgetheader(ng-dblclick="maximize()")
 		h3.panel-title
 			button.btn.btn-primary.btn-xs(stop-event="dblclick",
@@ -66,7 +67,6 @@ div.widget-main.panel.panel-primary(id="{{widget.name}}",
 						ng-hide="widget.series.length >= seriesLimit || seriesMoving")
 
 		div(d3Chart)
-
 
 		center(ng-show="groupsLimit > 0")
 			ul(ui-sortable="sortOptions",

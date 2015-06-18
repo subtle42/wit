@@ -66,7 +66,6 @@ exports.show = function(req, res) {
 // Creates a new Source in the DB.
 exports.create = function(req, res) {
   var myFile = req.files.file;
-  console.log(req);
   MongoClient.connect('mongodb://127.0.0.1:27017/mean-data', function (err, db) {
     if (err) { handleError(res, err); }
 
@@ -106,7 +105,7 @@ exports.create = function(req, res) {
         console.log('tmp file deleted');
       });
       db.close();
-      createNewSource(myFile, location, headers, count--, req.body.data, function (source) {
+      createNewSource(myFile, location, headers, count-2, req.body.data, function (source) {
         return res.json(source);
       });
     });
@@ -157,10 +156,18 @@ function createNewSource(myFile, location, headers, count, userId, callback) {
       columns: myColumns
     });
 
-    Source.create(mySource, function (err, source) {
-      if (err) { return handleError(res, err); }
-      if (callback) { callback(source); }
-    });
+    MongoClient.connect('mongodb://127.0.0.1:27017/mean-data', function (err, db) {
+      mySource.columns.forEach(function (col) {
+        getColumnEnumValues(col, db, location, mySource.columns.length-1, function () {
+          Source.create(mySource, function (err, source) {
+            if (err) { return handleError(res, err); }
+            if (callback) { callback(source); }
+          });
+        })
+      });
+    });    
+
+    
   });
 };
 
@@ -192,7 +199,7 @@ function sortByColumn (docs, headers, callback) {
   });
 
   columns.forEach(function (col, i) {
-    findColumnBaseType(col, function (baseType) {
+    findColumnBaseType(col, i, function (baseType) {
       response.push({
         ref: i,
         name: headers[i],
@@ -205,7 +212,7 @@ function sortByColumn (docs, headers, callback) {
   });
 };
 
-function findColumnBaseType (column, callback) {
+function findColumnBaseType (column, columnName, callback) {
   var type = {
     group: 0,
     number: 0,
@@ -237,6 +244,22 @@ function findColumnBaseType (column, callback) {
   } else {
     response = 'text';
   }
-
   callback(response);
+
+};
+
+//TODO: the column values found are not returned
+function getColumnEnumValues (column, db, location, columnCount, callback) {
+  if (column.type === 'group') {  
+    db.collection(location).distinct(String(column.ref), function (err, docs) {
+      column.enum = docs;
+      if (column.ref === columnCount) {
+        callback();
+      }
+    });
+  } else {
+    if (column.ref === columnCount) {
+      callback();
+    }
+  }
 };
